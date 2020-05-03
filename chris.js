@@ -305,6 +305,7 @@ function screen(){
     backgroundMusic.sound.volume = 0.3;
     backgroundMusic.play();
     myGameArea.intervalFunction();
+    gamePieceYOnTap = 0;
 }
 
 var gamePiece;
@@ -320,8 +321,13 @@ function init(){
     // myGameArea.intervalFunction();
     myObstacle = [];
     score = 0 ;
-    gamePiece = new component(myGameArea.canvas.width/2, 400);
-    myObstacle.push(new obstacle(myGameArea.canvas.width/2, 200, "red", 0, Math.PI));
+    gamePiece = new component(myGameArea.canvas.width/2, myGameArea.canvas.height -100);
+    var canvasHeight = myGameArea.canvas.height;
+    var gap = 300;
+    while(canvasHeight > 200){
+    myObstacle.push(new obstacle(myGameArea.canvas.width/2, canvasHeight - gap, "red", 0, Math.PI));
+    canvasHeight -= gap;
+    }
     myScore = new rectangle(myGameArea.canvas.width/40, myGameArea.canvas.height/15, "white", "40px", "Consolas", "score");
     jumpSound = new sound("./assets/sounds/jump.wav");
     deadSound = new sound("./assets/sounds/dead.wav");
