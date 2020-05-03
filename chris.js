@@ -302,18 +302,34 @@ function rectangle(x, y, color, width, height, type){
     this.width = width;
     this.height = height;
     this.type = type;
-
+    this.dy = 0;
     this.draw = function(){
-        ctx = myGameArea.context;
+        var ctx = myGameArea.context;
         if(this.type == "score"){
             ctx.font = this.width + " " + this.height;
             ctx.fillStyle = this.color;
             ctx.fillText(score, this.x, this.y);
-        }else{
+        } else if(this.type = "bestScore"){
+            ctx.fillStyle = this.color;
+            ctx.fillRect(this.x, this.y, this.width/2 - 70, this.height);
+            ctx.textAlign = "center";
+            ctx.font = "25px serif";
+            ctx.fillText("High-Score", this.width/2, this.y + 10);
+            ctx.fillRect(this.x + this.width/2 + 70, this.y, this.width/2 - 70, this.height);
+        } else{
             ctx.fillStyle = this.color;
             ctx.fillRect(this.x, this.y, this.width, this.height);
         }
     }
+    this.update = function(){
+        this.radians += this.velocity;
+        if(this.y - this.yOnTap > 35){
+            this.dy = 0;
+        }
+        this.y += this.dy;
+        this.draw();
+    }
+
 }
 
 function imageButton(src1, src2, x, y, width, height){
@@ -408,6 +424,8 @@ var deadSound;
 var myScore;
 var pauseandplay;
 var soundOnAndOff;
+var bestScoreUpdate;
+var intialObstacleCount = 0;
 function init(){
     // gamestate = 1;
     canvasElement.removeEventListener('click', screen);
@@ -423,6 +441,7 @@ function init(){
     while(canvasHeight > 200){
     myObstacle.push(new obstacle(myGameArea.canvas.width/2, canvasHeight - gap, "red", 0, Math.PI));
     canvasHeight -= gap;
+    intialObstacleCount++;
     }
     myScore = new rectangle(myGameArea.canvas.width/40, myGameArea.canvas.height/15, "white", "40px", "Consolas", "score");
     jumpSound = new sound("./assets/sounds/jump.wav");
@@ -431,6 +450,8 @@ function init(){
     var img2 = document.getElementById('play');
     pauseandplay = new imageButton(img1, img2, myGameArea.canvas.width - myGameArea.canvas.width/15, myGameArea.canvas.height/30, myGameArea.canvas.width/20, myGameArea.canvas.width/20);
     console.log(pauseandplay);
+    bestScoreFunction();
+    bestScoreUpdate = 0;
     // var img3 = document.getElementById('soundon');
     // var img4 = document.getElementById('soundof');
     // soundOnAndOff = new imageButton(img3, img4, myGameArea.canvas.width - 2*myGameArea.canvas.width/15, myGameArea.canvas.height/30, myGameArea.canvas.width/20, myGameArea.canvas.width/20);
@@ -472,6 +493,19 @@ function updateGameArea(){
         myObstacle.push(new obstacle(myGameArea.canvas.width/2, -100, "red", 0, Math.PI));
         console.log(myObstacle);
     }
+    if(myObstacle.length + 1 > bestScore && !(bestScoreUpdate)){
+        // console.log(myObstacle.length)
+        if(bestScore <= intialObstacleCount){
+            var index = bestScore-1;
+        }else{
+            var index = myObstacle.length - 1;
+        }
+        var height = myObstacle[index].y - 150;
+        bestScoreUpdate = new rectangle(0, height, "#FF0000", myGameArea.canvas.width, 2, "bestscore");
+    }
+    if(bestScoreUpdate){
+        bestScoreUpdate.update();
+    }
     myObstacle.forEach((obstacle)=>{
         obstacle.update();
     })
@@ -502,6 +536,10 @@ function jumpClickFunction(){
         obstacle.yOnTap = obstacle.y;
         obstacle.dy = 3;
     })
+    if(bestScoreUpdate){
+        bestScoreUpdate.yOnTap = bestScoreUpdate.y;
+        bestScoreUpdate.dy = 3;
+    }
 
     // myObstacle.y +=7;
     // myObstacle1.y +=7;
