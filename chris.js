@@ -16,8 +16,9 @@ var myGameArea = {
     stop: function(){
         clearInterval(this.interval);
         canvasElement.removeEventListener('click', jumpClickFunction);
-        backgroundMusic.stop();
+        // backgroundMusic.stop();
         bestScoreFunction();
+        deadSound.play();
         if(bestScore){
             if(bestScore <  score){
                 localStorage.setItem('colorswitch', JSON.stringify(score));
@@ -27,6 +28,7 @@ var myGameArea = {
             localStorage.setItem('colorswitch', JSON.stringify(score));
             bestScore = score;
         }
+        //to wait for play again
         setTimeout(() => {
             var ctx = this.context;
             ctx.fillStyle = "rgba(1,1,1,0.7)";
@@ -42,7 +44,7 @@ var myGameArea = {
             ctx.fillText("Highest Score: " + bestScore, centerWidth, centerHeight +10); 
             ctx.font = "15px Consolas";
             setTimeout(() => {
-                ctx.fillText("click here to start the game", centerWidth, centerHeight + 40);
+                ctx.fillText("click here to play again", centerWidth, centerHeight + 40);
                 canvasElement.addEventListener('click', screen);
             },700)
         }, 100);
@@ -63,11 +65,12 @@ function component(x, y){
 
     this.update = function(){
 
-        if(this.y +  this.radius + this.dy> myGameArea.canvas.height - 50){
-            // this.dy = -this.dy; 
-        } else{
-            this.dy += this.gravity;
-        }
+        // if(this.y +  this.radius + this.dy> myGameArea.canvas.height - 50){
+        //     // this.dy = -this.dy; 
+        // } else{
+        //     this.dy += this.gravity;
+        // }
+        this.dy += this.gravity;
         if(gamePieceYOnTap - gamePiece.y > 30){
             this.dy = -this.dy;
         }
@@ -86,10 +89,14 @@ function component(x, y){
 
     this.hitBottom = function(){
         var rockBottom = myGameArea.canvas.height - 100;
-        if(this.y>rockBottom){
+        if(this.y>=rockBottom  && (!gamePieceYOnTap)){
             this.y = rockBottom;
             this.dy = 0;
             // this.gravitySpeed = -(this.gravitySpeed * 1);
+        }
+        if(gamePieceYOnTap && this.y + this.radius + this.dy >= myGameArea.canvas.height){
+            this.y = myGameArea.canvas.height - this.radius;
+            myGameArea.stop();
         }
         this.draw();
     }
@@ -98,21 +105,21 @@ function component(x, y){
 
         var pieceTop = this.y - this.radius;
         var pieceBottom = this.y + this.radius;
-        var otherBottoma = otherObs.y + otherObs.radius - 10;
-        var otherBottomb = otherObs.y + otherObs.radius + 10;
-        var otherTopb = otherObs.y - otherObs.radius + 10;
-        var otherTopa = otherObs.y - otherObs.radius - 10;
+        var otherBottoma = otherObs.y + otherObs.radius - otherObs.lineWidth/2;
+        var otherBottomb = otherObs.y + otherObs.radius + otherObs.lineWidth/2;
+        var otherTopb = otherObs.y - otherObs.radius + otherObs.lineWidth/2;
+        var otherTopa = otherObs.y - otherObs.radius - otherObs.lineWidth/2;
 
 
         //for the detection when the ball enter 1st time
-        if(otherBottomb > pieceTop && otherObs.count == 0){
+        if(otherBottomb >= pieceTop && otherObs.count == 0){
             var radians = (otherObs.radians)%(Math.PI*2);
             if(radians > (Math.PI/2) && radians < 3*(Math.PI/2)){
                 otherObs.count++;
                 if(otherObs.firstTime == 0){
                     otherObs.firstTime++;
                     score++;
-                    console.log(score);
+                    // console.log(score);
                 }
                 // console.log("blue");
             }else{
@@ -121,6 +128,7 @@ function component(x, y){
             }
             // console.log(otherObs.count);
         }
+
         //for the detetcion when the ball get out from bottom after enetering
         if(otherObs.count == 1 && pieceBottom > otherBottoma){
             var radians = (otherObs.radians)%(Math.PI*2);
@@ -132,6 +140,7 @@ function component(x, y){
                 myGameArea.stop();
             }
         }
+
         //for the detetcion when the ball get out from above after enetering
         if(otherObs.count == 1 && pieceTop < otherTopb){
             // console.log("hey");
@@ -144,6 +153,7 @@ function component(x, y){
                 // console.log("blue");
             }
         }
+
         //for the detetcion when the ball get out from above after enetering
         if(otherObs.count == 2 && pieceBottom > otherTopa){
             var radians = (otherObs.radians)%(Math.PI*2);
@@ -188,6 +198,7 @@ function obstacle(x, y, color, angle1, angle2){
     this.radius = 90;
     this.radians = 0;
     this.velocity = 0.03;
+    this.lineWidth = 20;
     this.count = 0;
     this.firstTime = 0;
     this.update = function(){
@@ -203,13 +214,13 @@ function obstacle(x, y, color, angle1, angle2){
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, angle1 + this.radians, angle2+this.radians);
         ctx.strokeStyle = this.color;
-        ctx.lineWidth = 20;
+        ctx.lineWidth = this.lineWidth;
         ctx.stroke();
 
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, Math.PI + this.radians, Math.PI*2+ this.radians);
         ctx.strokeStyle = "blue";
-        ctx.lineWidth = 20;
+        ctx.lineWidth = this.lineWidth;
         ctx.stroke();
         // ctx.beginPath();
         // ctx.rect(100, this.y+this.radius -10, 400, 1);
@@ -286,12 +297,12 @@ function startScreen(){
 }
 startScreen();
 
+// to start the game on click
 function screen(){
-    console.log("screen");
     init();
     backgroundMusic = new sound("./assets/sounds/background.mp3");
     backgroundMusic.sound.loop = true;
-    backgroundMusic.sound.volume = 0.4;
+    backgroundMusic.sound.volume = 0.3;
     backgroundMusic.play();
     myGameArea.intervalFunction();
 }
@@ -300,6 +311,7 @@ var gamePiece;
 var myObstacle = [];
 var jumpSound;
 var backgroundMusic;
+var deadSound;
 var myScore;
 function init(){
     canvasElement.removeEventListener('click', screen);
@@ -312,11 +324,12 @@ function init(){
     myObstacle.push(new obstacle(myGameArea.canvas.width/2, 200, "red", 0, Math.PI));
     myScore = new rectangle(myGameArea.canvas.width/40, myGameArea.canvas.height/15, "white", "40px", "Consolas", "score");
     jumpSound = new sound("./assets/sounds/jump.wav");
+    deadSound = new sound("./assets/sounds/dead.wav");
 }
 // init();
 
-var hey = 300;
-var first = 1;
+// var hey = 300;
+// var first = 1;
 function updateGameArea(){
     // gamePiece.crashWith(myObstacle1);
     myGameArea.clear();
@@ -357,22 +370,14 @@ var bestScore;
 function bestScoreFunction(){
     if(localStorage.getItem("colorswitch")){
        bestScore = parseInt(JSON.parse(localStorage.getItem("colorswitch")));
-       console.log(bestScore);
     }
-}
-
-function everyInterval(n){
-    if((myGameArea.frameNo / n)%1 == 0){
-        return true;
-    }
-    return false;
 }
 
 var gamePieceYOnTap;
 // addEventListener('click', jumpClickFunction);
 
 function jumpClickFunction(){
-    console.log('hi');
+    // console.log('hi');
     jumpSound.play();
     gamePieceYOnTap = gamePiece.y;
     gamePiece.dy = -2;
