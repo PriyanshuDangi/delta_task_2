@@ -366,7 +366,7 @@ function component(x, y, color){
     }
 }
 
-function obstacle(x, y, color, angle1, angle2, type, parts){
+function obstacle(x, y, color, angle1, angle2, type, parts, number){
     this.x = x;
     this.y = y;
     this.color = color;
@@ -374,15 +374,27 @@ function obstacle(x, y, color, angle1, angle2, type, parts){
     this.angle2 = angle2;
     this.type = type;
     this.parts = parts;
+    this.number = number>0 ? number : 0;
     this.dx = 0;
     this.dy = 0;
     this.radius = 90;
-    this.radians = 0;
-    this.velocity = 0.03;
     this.lineWidth = 20;
     this.count = 0;
     this.firstTime = 0;
+
+    if(randomIntFromRange(0,1)){
+        this.radians = 0;
+        this.velocity = 0.03;
+    }else{
+        this.radians = 2*Math.PI;
+        this.velocity = -0.03;
+    }
+    this.velocity += (this.velocity/3)*parseInt(this.number/5);
     this.update = function(){
+        if(this.radians < 0){
+            this.radians = 2*Math.PI;
+        }
+        
         this.radians += this.velocity;
         if(this.y - this.yOnTap > 35){
             this.dy = 0;
@@ -708,7 +720,7 @@ function init(){
         canvasHeight -= gap;
         intialObstacleCount++;
     }
-    myColorSwitch.push(new colorSwitch(myGameArea.canvas.width/2, myGameArea.canvas.height - 150, 2));
+    myColorSwitch.push(new colorSwitch(myGameArea.canvas.width/2, myGameArea.canvas.height + 150, 2));
     myScore = new rectangle(myGameArea.canvas.width/40, myGameArea.canvas.height/15, "white", "40px", "Consolas", "score");
     jumpSound = new sound("./assets/sounds/jump.wav");
     deadSound = new sound("./assets/sounds/dead.wav");
@@ -761,7 +773,7 @@ function updateGameArea(){
     // }
     if(myObstacle[myObstacle.length-1].y > 200){
         var parts = randomIntFromRange(2, 4);
-        myObstacle.push(new obstacle(myGameArea.canvas.width/2, -100, "red", 0, Math.PI, "circle", parts));
+        myObstacle.push(new obstacle(myGameArea.canvas.width/2, -100, "red", 0, Math.PI, "circle", parts, myObstacle.length));
         myColorSwitch.push(new colorSwitch(myGameArea.canvas.width/2, 50, parts));
         // console.log(myObstacle);
     }
