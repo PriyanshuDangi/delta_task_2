@@ -17,7 +17,7 @@ var myGameArea = {
         clearInterval(this.interval);
         canvasElement.removeEventListener('click', jumpClickFunction);
         canvasElement.removeEventListener('click', clickImage);
-        // backgroundMusic.stop();
+        backgroundMusic.stop();
         bestScoreFunction();
         deadSound.play();
         if(bestScore){
@@ -256,11 +256,24 @@ function component(x, y, color){
     }
 
     this.ringCrash = function(color, colorAngle, otherObs){
-        var colorIndex = color.indexOf(this.color);
-        var bottomAngle1 = colorAngle[colorIndex].bottom.angle1;
-        var bottomAngle2 = colorAngle[colorIndex].bottom.angle2;
-        var topAngle1 = colorAngle[colorIndex].top.angle1;
-        var topAngle2 = colorAngle[colorIndex].top.angle2;
+        var ballColor = this.color; 
+        var colorIndex = color.indexOf(ballColor);
+        if(colorIndex == -1){
+            // return;
+            var bottomAngle1 = -1;
+            var bottomAngle2 = -1;
+            var topAngle1 = -1;
+            var topAngle2 = -1;
+            var bottomAngle3 = false;
+            var topAngle3 = false;
+        }else{      
+            var bottomAngle1 = colorAngle[colorIndex].bottom.angle1;
+            var bottomAngle2 = colorAngle[colorIndex].bottom.angle2;
+            var bottomAngle3 = colorAngle[colorIndex].bottom.angle3;
+            var topAngle1 = colorAngle[colorIndex].top.angle1;
+            var topAngle2 = colorAngle[colorIndex].top.angle2;
+            var topAngle3 = colorAngle[colorIndex].top.angle3;
+        }
 
         var pieceTop = this.y - this.radius;
         var pieceBottom = this.y + this.radius;
@@ -269,11 +282,10 @@ function component(x, y, color){
         var otherTopb = otherObs.y - otherObs.radius + otherObs.lineWidth/2;
         var otherTopa = otherObs.y - otherObs.radius - otherObs.lineWidth/2;
 
-
         //for the detection when the ball enter 1st time
         if(otherObs.count == 0 && otherBottomb >= pieceTop){
             var radians = (otherObs.radians)%(Math.PI*2);
-            if(colorAngle[colorIndex].bottom.angle3){
+            if(bottomAngle3){
                 if(radians > bottomAngle1 && radians < bottomAngle2){
                     myGameArea.stop();
                 } else{
@@ -301,7 +313,7 @@ function component(x, y, color){
         //for the detetcion when the ball get out from bottom after enetering
         if(otherObs.count == 1 && pieceBottom > otherBottoma){
             var radians = (otherObs.radians)%(Math.PI*2);
-            if(colorAngle[colorIndex].bottom.angle3){
+            if(bottomAngle3){
                 if(radians > bottomAngle1 && radians < bottomAngle2){   
                     myGameArea.stop();
                 } else{
@@ -319,7 +331,7 @@ function component(x, y, color){
         //for the detetcion when the ball get out from above after enetering
         if(otherObs.count == 1 && pieceTop < otherTopb){
             var radians = (otherObs.radians)%(Math.PI*2);
-            if(colorAngle[colorIndex].top.angle3){
+            if(topAngle3){
                 if(radians > topAngle1 && radians < topAngle2){               
                     myGameArea.stop();
                 }else{
@@ -337,7 +349,7 @@ function component(x, y, color){
         //for the detetcion when the ball get in from above after leaving
         if(otherObs.count == 2 && pieceBottom > otherTopa){
             var radians = (otherObs.radians)%(Math.PI*2);
-            if(colorAngle[colorIndex].top.angle3){
+            if(topAngle3){
                 if(radians > topAngle1 && radians < topAngle2){               
                     myGameArea.stop();
                 }else{
@@ -463,7 +475,7 @@ function sound(src) {
     document.body.appendChild(this.sound);
     this.play = function(){
     //   console.log(this.sound);
-    //   this.sound.play();
+      this.sound.play();
     }
     this.stop = function(){
       this.sound.pause();
@@ -505,6 +517,80 @@ function rectangle(x, y, color, width, height, type){
         this.draw();
     }
 
+}
+
+function colorSwitch(x, y, parts){
+    this.x = x;
+    this.y = y;
+    this.parts = parts;
+    this.radius = 5;
+    this.dy = 0;
+
+    this.update = function(){
+        if(this.y - this.yOnTap > 35){
+            this.dy = 0;
+        }
+        this.y += this.dy;
+        this.draw();
+    }
+
+    this.draw = function(){
+        var ctx = myGameArea.context;
+        ctx.beginPath();
+        // ctx.lineWidth = 10;
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI/2);
+        // ctx.fillStyle = color4[0];
+        // ctx.fill();
+        ctx.strokeStyle = color4[0];
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, Math.PI/2, Math.PI);
+        // ctx.fillStyle = color4[1];
+        // ctx.fill();
+        ctx.strokeStyle = color4[1];
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, Math.PI, 3*Math.PI/2);
+        // ctx.fillStyle = color4[2];
+        // ctx.fill();
+        ctx.strokeStyle = color4[2];
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 3*Math.PI/2, Math.PI*2);
+        // ctx.fillStyle = color4[3];
+        // ctx.fill();
+        ctx.strokeStyle = color4[3];
+        ctx.stroke();
+    }
+    
+    this.crashWith = function(otherObj){
+        // var myLeft = this.x;
+        // var myRight = this.x + (this.width);
+        var myTop = this.y - this.radius;
+        var myBottom = this.y + (this.radius);
+        // var otherLeft = otherObj.x;
+        // var otherRight = otherObj.x + (otherObj.width);
+        var otherTop = otherObj.y - otherObj.radius;
+        var otherBottom = otherObj.y + (otherObj.radius);
+        // var crash = true;
+        if((myBottom < otherTop) || (myTop > otherBottom)){
+            // crash = false;
+            // console.log("hey");
+        } else{
+            if(this.parts == 3){
+                gamePiece.color = randomColor(color3);
+            } else if (this.parts == 4){
+                gamePiece.color = randomColor(color4);
+            }else{
+                gamePiece.color = randomColor(color2);
+            }
+            myColorSwitch.shift();
+        }
+        // return crash;
+    }
 }
 
 function imageButton(src1, src2, x, y, width, height){
@@ -593,6 +679,7 @@ function screen(){
 
 var gamePiece;
 var myObstacle = [];
+var myColorSwitch = [];
 var jumpSound;
 var backgroundMusic;
 var deadSound;
@@ -610,6 +697,7 @@ function init(){
     // myGameArea.intervalFunction();
     intialObstacleCount = 0;
     myObstacle = [];
+    myColorSwitch = [];
     score = 0 ;
     var color = randomColor(color2);
     gamePiece = new component(myGameArea.canvas.width/2, myGameArea.canvas.height -100, color);
@@ -620,6 +708,7 @@ function init(){
         canvasHeight -= gap;
         intialObstacleCount++;
     }
+    myColorSwitch.push(new colorSwitch(myGameArea.canvas.width/2, myGameArea.canvas.height - 150, 2));
     myScore = new rectangle(myGameArea.canvas.width/40, myGameArea.canvas.height/15, "white", "40px", "Consolas", "score");
     jumpSound = new sound("./assets/sounds/jump.wav");
     deadSound = new sound("./assets/sounds/dead.wav");
@@ -647,7 +736,11 @@ function updateGameArea(){
     // gamePiece.crashWith(myObstacle1);
     myGameArea.clear();
     for(var i=0; i < myObstacle.length; i++){
+        // if(gamePiece.y - myObstacle[i].y < myGameArea.canvas.height/2 && gamePiece.y - myObstacle[i].y > -myGameArea.canvas.height/2)
         gamePiece.crashWith(myObstacle[i]);
+    }
+    for(var j=0; j<myColorSwitch.length; j++){
+        myColorSwitch[j].crashWith(gamePiece);
     }
     myGameArea.frameNo++;
     // if(everyInterval(100) || myGameArea.frameNo == 1){
@@ -669,6 +762,7 @@ function updateGameArea(){
     if(myObstacle[myObstacle.length-1].y > 200){
         var parts = randomIntFromRange(2, 4);
         myObstacle.push(new obstacle(myGameArea.canvas.width/2, -100, "red", 0, Math.PI, "circle", parts));
+        myColorSwitch.push(new colorSwitch(myGameArea.canvas.width/2, 50, parts));
         // console.log(myObstacle);
     }
     if(myObstacle.length + 1 > bestScore && !(bestScoreUpdate)){
@@ -684,6 +778,9 @@ function updateGameArea(){
     if(bestScoreUpdate){
         bestScoreUpdate.update();
     }
+    myColorSwitch.forEach((particle)=>{
+        particle.update();
+    })
     myObstacle.forEach((obstacle)=>{
         obstacle.update();
     })
@@ -713,6 +810,10 @@ function jumpClickFunction(){
     myObstacle.forEach((obstacle)=>{
         obstacle.yOnTap = obstacle.y;
         obstacle.dy = 3;
+    })
+    myColorSwitch.forEach((particle)=>{
+        particle.yOnTap = particle.y;
+        particle.dy = 3;
     })
     if(bestScoreUpdate){
         bestScoreUpdate.yOnTap = bestScoreUpdate.y;
