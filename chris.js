@@ -245,123 +245,178 @@ function component(x, y, color){
     }
 
     this.crashWith = function(otherObs){
-        var parts = otherObs.parts;
-        if(parts == 4){
-            this.ringCrash(color4, colorAngle4, otherObs);
-        }else if(parts == 3){
-            this.ringCrash(color3, colorAngle3, otherObs);
-        }else if(parts == 2){
-            this.ringCrash(color2, colorAngle2, otherObs);
+        if(otherObs.type == "ring"){    
+            var parts = otherObs.parts;
+            if(parts == 4){
+                this.ringCrash(color4, colorAngle4, otherObs);
+            }else if(parts == 3){
+                this.ringCrash(color3, colorAngle3, otherObs);
+            }else if(parts == 2){
+                this.ringCrash(color2, colorAngle2, otherObs);
+            }
+        }else if(otherObs.type == "rectangle"){
+            var myTop = this.y - this.radius;
+            var myBottom = this.y + (this.radius);
+            var otherTop = otherObs.y;
+            var otherBottom = otherObs.y + (otherObs.angle2);
+            if((myBottom < otherTop) || (myTop > otherBottom)){
+                // crash = false;
+                // console.log("hii");
+            } else{
+                // console.log("hey");
+                    if(otherObs.parts == 1){
+                    if(otherObs.color == this.color){
+                        otherObs.count++;
+            
+                        if(otherObs.firstTime == 0){
+                            otherObs.firstTime++;
+                            score++;
+                        }
+                    }else{
+                        myGameArea.stop();
+                    }
+                }  
+            }
+            // return crash;
+        }else if(otherObs.type == "rotRect"){
+            var angle = (otherObs.angle+(Math.PI/4))%(Math.PI/2);
+            var angleCheck = (otherObs.angle+(Math.PI/4))%(Math.PI*2);
+            var myTop = this.y - this.radius;
+            var myBottom = this.y + (this.radius);
+            var otherTop = otherObs.y + (100/Math.SQRT2)*Math.tan(angle - (Math.PI/4));
+            var otherBottom = otherObs.y + (100/Math.SQRT2)*Math.tan(angle - (Math.PI/4)) + 20;
+            if((myBottom < otherTop) || (myTop > otherBottom)){
+                // crash = false;
+                // console.log("hii");
+                // myGameArea.stop();
+            } else{
+                // console.log("hey");
+                var ballColor = this.color;
+                var colorIndex = color4.indexOf(ballColor);
+                if(angleCheck >= colorIndex*(Math.PI/2) && angleCheck < (colorIndex+1)*(Math.PI/2)){
+                    otherObs.count++;
+            
+                    if(otherObs.firstTime == 0){
+                        otherObs.firstTime++;
+                        score++;
+                    }
+                }else{
+                    myGameArea.stop();
+                }  
+            }
+
         }
     }
 
-    this.ringCrash = function(color, colorAngle, otherObs){
-        var ballColor = this.color; 
-        var colorIndex = color.indexOf(ballColor);
-        if(colorIndex == -1){
-            // return;
-            var bottomAngle1 = -1;
-            var bottomAngle2 = -1;
-            var topAngle1 = -1;
-            var topAngle2 = -1;
-            var bottomAngle3 = false;
-            var topAngle3 = false;
-        }else{      
-            var bottomAngle1 = colorAngle[colorIndex].bottom.angle1;
-            var bottomAngle2 = colorAngle[colorIndex].bottom.angle2;
-            var bottomAngle3 = colorAngle[colorIndex].bottom.angle3;
-            var topAngle1 = colorAngle[colorIndex].top.angle1;
-            var topAngle2 = colorAngle[colorIndex].top.angle2;
-            var topAngle3 = colorAngle[colorIndex].top.angle3;
-        }
+    this.ringCrash = function(color, colorAngle, otherObs){ 
+        if(otherObs.type == "ring"){
+            var ballColor = this.color; 
+            var colorIndex = color.indexOf(ballColor);
+            if(colorIndex == -1){
+                // return;
+                var bottomAngle1 = -1;
+                var bottomAngle2 = -1;
+                var topAngle1 = -1;
+                var topAngle2 = -1;
+                var bottomAngle3 = false;
+                var topAngle3 = false;
+            }else{      
+                var bottomAngle1 = colorAngle[colorIndex].bottom.angle1;
+                var bottomAngle2 = colorAngle[colorIndex].bottom.angle2;
+                var bottomAngle3 = colorAngle[colorIndex].bottom.angle3;
+                var topAngle1 = colorAngle[colorIndex].top.angle1;
+                var topAngle2 = colorAngle[colorIndex].top.angle2;
+                var topAngle3 = colorAngle[colorIndex].top.angle3;
+            }
 
-        var pieceTop = this.y - this.radius;
-        var pieceBottom = this.y + this.radius;
-        var otherBottoma = otherObs.y + otherObs.radius - otherObs.lineWidth/2;
-        var otherBottomb = otherObs.y + otherObs.radius + otherObs.lineWidth/2;
-        var otherTopb = otherObs.y - otherObs.radius + otherObs.lineWidth/2;
-        var otherTopa = otherObs.y - otherObs.radius - otherObs.lineWidth/2;
+            var pieceTop = this.y - this.radius;
+            var pieceBottom = this.y + this.radius;
+            var otherBottoma = otherObs.y + otherObs.radius - otherObs.lineWidth/2;
+            var otherBottomb = otherObs.y + otherObs.radius + otherObs.lineWidth/2;
+            var otherTopb = otherObs.y - otherObs.radius + otherObs.lineWidth/2;
+            var otherTopa = otherObs.y - otherObs.radius - otherObs.lineWidth/2;
 
-        //for the detection when the ball enter 1st time
-        if(otherObs.count == 0 && otherBottomb >= pieceTop){
-            var radians = (otherObs.radians)%(Math.PI*2);
-            if(bottomAngle3){
-                if(radians > bottomAngle1 && radians < bottomAngle2){
-                    myGameArea.stop();
-                } else{
-                    otherObs.count++;
-    
-                    if(otherObs.firstTime == 0){
-                        otherObs.firstTime++;
-                        score++;
+            //for the detection when the ball enter 1st time
+            if(otherObs.count == 0 && otherBottomb >= pieceTop){
+                var radians = (otherObs.radians)%(Math.PI*2);
+                if(bottomAngle3){
+                    if(radians > bottomAngle1 && radians < bottomAngle2){
+                        myGameArea.stop();
+                    } else{
+                        otherObs.count++;
+        
+                        if(otherObs.firstTime == 0){
+                            otherObs.firstTime++;
+                            score++;
+                        }
                     }
-                }
-            }else{
-                if(radians > bottomAngle1 && radians < bottomAngle2){
-                    otherObs.count++;
-    
-                    if(otherObs.firstTime == 0){
-                        otherObs.firstTime++;
-                        score++;
-                    }
-                } else{
-                    myGameArea.stop();
-                }
-            }      
-        }
-
-        //for the detetcion when the ball get out from bottom after enetering
-        if(otherObs.count == 1 && pieceBottom > otherBottoma){
-            var radians = (otherObs.radians)%(Math.PI*2);
-            if(bottomAngle3){
-                if(radians > bottomAngle1 && radians < bottomAngle2){   
-                    myGameArea.stop();
-                } else{
-                    otherObs.count--;
-                }
-            }else{
-                if(radians > bottomAngle1 && radians < bottomAngle2){
-                    otherObs.count--;
-                } else{
-                    myGameArea.stop();
-                }
-            }   
-        }
-
-        //for the detetcion when the ball get out from above after enetering
-        if(otherObs.count == 1 && pieceTop < otherTopb){
-            var radians = (otherObs.radians)%(Math.PI*2);
-            if(topAngle3){
-                if(radians > topAngle1 && radians < topAngle2){               
-                    myGameArea.stop();
                 }else{
-                    otherObs.count++;
-                }
-            }else{
-                if(radians > topAngle1 && radians < topAngle2){
-                    otherObs.count++;
-                }else{               
-                    myGameArea.stop();
+                    if(radians > bottomAngle1 && radians < bottomAngle2){
+                        otherObs.count++;
+        
+                        if(otherObs.firstTime == 0){
+                            otherObs.firstTime++;
+                            score++;
+                        }
+                    } else{
+                        myGameArea.stop();
+                    }
+                }      
+            }
+
+            //for the detetcion when the ball get out from bottom after enetering
+            if(otherObs.count == 1 && pieceBottom > otherBottoma){
+                var radians = (otherObs.radians)%(Math.PI*2);
+                if(bottomAngle3){
+                    if(radians > bottomAngle1 && radians < bottomAngle2){   
+                        myGameArea.stop();
+                    } else{
+                        otherObs.count--;
+                    }
+                }else{
+                    if(radians > bottomAngle1 && radians < bottomAngle2){
+                        otherObs.count--;
+                    } else{
+                        myGameArea.stop();
+                    }
+                }   
+            }
+
+            //for the detetcion when the ball get out from above after enetering
+            if(otherObs.count == 1 && pieceTop < otherTopb){
+                var radians = (otherObs.radians)%(Math.PI*2);
+                if(topAngle3){
+                    if(radians > topAngle1 && radians < topAngle2){               
+                        myGameArea.stop();
+                    }else{
+                        otherObs.count++;
+                    }
+                }else{
+                    if(radians > topAngle1 && radians < topAngle2){
+                        otherObs.count++;
+                    }else{               
+                        myGameArea.stop();
+                    }
                 }
             }
-        }
 
-        //for the detetcion when the ball get in from above after leaving
-        if(otherObs.count == 2 && pieceBottom > otherTopa){
-            var radians = (otherObs.radians)%(Math.PI*2);
-            if(topAngle3){
-                if(radians > topAngle1 && radians < topAngle2){               
-                    myGameArea.stop();
+            //for the detetcion when the ball get in from above after leaving
+            if(otherObs.count == 2 && pieceBottom > otherTopa){
+                var radians = (otherObs.radians)%(Math.PI*2);
+                if(topAngle3){
+                    if(radians > topAngle1 && radians < topAngle2){               
+                        myGameArea.stop();
+                    }else{
+                        otherObs.count--;
+                    }
                 }else{
-                    otherObs.count--;
-                }
-            }else{
-                if(radians > topAngle1 && radians < topAngle2){
-                    otherObs.count--;
-                }else{               
-                    myGameArea.stop();
-                }
-            }  
+                    if(radians > topAngle1 && radians < topAngle2){
+                        otherObs.count--;
+                    }else{               
+                        myGameArea.stop();
+                    }
+                }  
+            }
         }
     }
 }
@@ -369,12 +424,12 @@ function component(x, y, color){
 function obstacle(x, y, color, angle1, angle2, type, parts, number){
     this.x = x;
     this.y = y;
-    this.color = color;
-    this.angle1 = angle1;
-    this.angle2 = angle2;
+    this.color = randomColor(color2);
+    this.angle1 = angle1;  //width for rectangles
+    this.angle2 = angle2;  //height for rectangles
     this.type = type;
     this.parts = parts;
-    this.number = number>0 ? number : 0;
+    this.number = number>0 ? number : 0;  //number of obstacle
     this.dx = 0;
     this.dy = 0;
     this.radius = 90;
@@ -382,20 +437,27 @@ function obstacle(x, y, color, angle1, angle2, type, parts, number){
     this.count = 0;
     this.firstTime = 0;
 
-    if(randomIntFromRange(0,1)){
-        this.radians = 0;
-        this.velocity = 0.03;
-    }else{
-        this.radians = 2*Math.PI;
-        this.velocity = -0.03;
-    }
-    this.velocity += (this.velocity/3)*parseInt(this.number/5);
-    this.update = function(){
-        if(this.radians < 0){
+    this.angle =  - Math.PI/4;  //for four rotRect
+    if(this.type == "ring"){
+        if(randomIntFromRange(0,1)){
+            this.radians = 0;
+            this.velocity = 0.03;
+        }else{
             this.radians = 2*Math.PI;
+            this.velocity = -0.03;
         }
-        
-        this.radians += this.velocity;
+        this.velocity += (this.velocity/3)*parseInt(this.number/5);
+    }
+
+    this.update = function(){
+        if(this.type == "ring"){
+            if(this.radians < 0){
+                this.radians = 2*Math.PI;
+            }
+            this.radians += this.velocity;
+        }else if(this.type == "rotRect"){
+            this.angle += 1 * Math.PI / 180;
+        }
         if(this.y - this.yOnTap > 35){
             this.dy = 0;
         }
@@ -404,76 +466,122 @@ function obstacle(x, y, color, angle1, angle2, type, parts, number){
     }
 
     this.draw = function(){
-        if(this.parts == 2){
-            var ctx = myGameArea.context;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, angle1 + this.radians, angle2+this.radians);
-            ctx.strokeStyle = this.color;
-            ctx.lineWidth = this.lineWidth;
-            ctx.stroke();
+        var ctx = myGameArea.context;
+        if(this.type == "ring"){
+            if(this.parts == 2){
+                
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, angle1 + this.radians, angle2+this.radians);
+                ctx.strokeStyle = "red";
+                ctx.lineWidth = this.lineWidth;
+                ctx.stroke();
+        
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, Math.PI + this.radians, Math.PI*2+ this.radians);
+                ctx.strokeStyle = "blue";
+                ctx.lineWidth = this.lineWidth;
+                ctx.stroke();
+            } else if(this.parts == 3){
+                
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, angle1 + this.radians, Math.PI*2/3 + this.radians);
+                ctx.strokeStyle = "red";
+                ctx.lineWidth = this.lineWidth;
+                ctx.stroke();
+        
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, Math.PI*2/3 + this.radians, Math.PI*4/3+ this.radians);
+                ctx.strokeStyle = "blue";
+                ctx.lineWidth = this.lineWidth;
+                ctx.stroke();
+        
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, Math.PI*4/3 + this.radians, Math.PI*2+ this.radians);
+                ctx.strokeStyle = "yellow";
+                ctx.lineWidth = this.lineWidth;
+                ctx.stroke();
+            } else if(this.parts == 4){
+                
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0 + this.radians, Math.PI/2 +this.radians);
+                ctx.strokeStyle = "red";
+                ctx.lineWidth = this.lineWidth;
+                ctx.stroke();
     
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, Math.PI + this.radians, Math.PI*2+ this.radians);
-            ctx.strokeStyle = "blue";
-            ctx.lineWidth = this.lineWidth;
-            ctx.stroke();
-        } else if(this.parts == 3){
-            var ctx = myGameArea.context;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, angle1 + this.radians, Math.PI*2/3 + this.radians);
-            ctx.strokeStyle = this.color;
-            ctx.lineWidth = this.lineWidth;
-            ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, Math.PI/2 + this.radians, Math.PI+ this.radians);
+                ctx.strokeStyle = "blue";
+                ctx.lineWidth = this.lineWidth;
+                ctx.stroke();
     
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, Math.PI*2/3 + this.radians, Math.PI*4/3+ this.radians);
-            ctx.strokeStyle = "blue";
-            ctx.lineWidth = this.lineWidth;
-            ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, Math.PI + this.radians, 3*Math.PI/2 +this.radians);
+                ctx.strokeStyle = "yellow";
+                ctx.lineWidth = this.lineWidth;
+                ctx.stroke();
     
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, Math.PI*4/3 + this.radians, Math.PI*2+ this.radians);
-            ctx.strokeStyle = "yellow";
-            ctx.lineWidth = this.lineWidth;
-            ctx.stroke();
-        } else if(this.parts == 4){
-            var ctx = myGameArea.context;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0 + this.radians, Math.PI/2 +this.radians);
-            ctx.strokeStyle = this.color;
-            ctx.lineWidth = this.lineWidth;
-            ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 3*Math.PI/2 + this.radians, 2*Math.PI+ this.radians);
+                ctx.strokeStyle = "green";
+                ctx.lineWidth = this.lineWidth;
+                ctx.stroke();
+            }else{
+                
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, angle1 + this.radians, angle2+this.radians);
+                ctx.strokeStyle = "red";
+                ctx.lineWidth = this.lineWidth;
+                ctx.stroke();
+        
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, Math.PI + this.radians, Math.PI*2+ this.radians);
+                ctx.strokeStyle = "blue";
+                ctx.lineWidth = this.lineWidth;
+                ctx.stroke();
+            }
+        } else if (this.type == "rectangle"){
+            if(this.parts == 1){
+                ctx.beginPath();
+                if(everyInterval(100)){
+                    // this.color = randomColor(color2);
+                    this.color = this.color == color2[0] ? color2[1] : color2[0];
+                }
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x - this.angle1/2, this.y, this.angle1, angle2);
+                ctx.fill();
+            }
+        }else if(this.type == "rotRect"){
+            var c = myGameArea.context;
+            c.save();
+            c.translate(this.x, this.y);        
+            c.rotate(this.angle);
+            c.fillStyle = "red";
+            c.fillRect(0, 0, 100, 20);        
+            c.restore();
+            
+            c.save();
+            c.translate(this.x, this.y);        
+            c.rotate(Math.PI/2 + this.angle);
+            c.fillStyle = "green";
+            c.fillRect(0, 0, 100, 20);        
+            c.restore();
+            
+            c.save();
+            c.translate(this.x, this.y);        
+            c.rotate(Math.PI + this.angle);
+            c.fillStyle = "yellow";
+            c.fillRect(0, 0, 100, 20);        
+            c.restore();
 
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, Math.PI/2 + this.radians, Math.PI+ this.radians);
-            ctx.strokeStyle = "blue";
-            ctx.lineWidth = this.lineWidth;
-            ctx.stroke();
+            c.save();
+            c.translate(this.x, this.y);        
+            c.rotate(3*Math.PI/2 + this.angle);
+            c.fillStyle = "blue";
+            c.fillRect(0, 0, 100, 20);        
+            c.restore();
 
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, Math.PI + this.radians, 3*Math.PI/2 +this.radians);
-            ctx.strokeStyle = "yellow";
-            ctx.lineWidth = this.lineWidth;
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 3*Math.PI/2 + this.radians, 2*Math.PI+ this.radians);
-            ctx.strokeStyle = "green";
-            ctx.lineWidth = this.lineWidth;
-            ctx.stroke();
-        }else{
-            var ctx = myGameArea.context;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, angle1 + this.radians, angle2+this.radians);
-            ctx.strokeStyle = this.color;
-            ctx.lineWidth = this.lineWidth;
-            ctx.stroke();
-    
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, Math.PI + this.radians, Math.PI*2+ this.radians);
-            ctx.strokeStyle = "blue";
-            ctx.lineWidth = this.lineWidth;
-            ctx.stroke();
+            // c.fillRect(innerWidth/2, 0, 2, innerHeight);
+            // c.fill();
         }
     }
 }
@@ -487,7 +595,7 @@ function sound(src) {
     document.body.appendChild(this.sound);
     this.play = function(){
     //   console.log(this.sound);
-      this.sound.play();
+    //   this.sound.play();
     }
     this.stop = function(){
       this.sound.pause();
@@ -716,10 +824,21 @@ function init(){
     var canvasHeight = myGameArea.canvas.height;
     var gap = 300;
     while(canvasHeight > 200){
-        myObstacle.push(new obstacle(myGameArea.canvas.width/2, canvasHeight - gap, "red", 0, Math.PI, "ring", intialObstacleCount+2));
+        var random = randomIntFromRange(0,4);
+        if(random < 3){
+            myObstacle.push(new obstacle(myGameArea.canvas.width/2, canvasHeight - gap, "red", 0, Math.PI, "ring", random+2));
+        }else if(random == 3){
+            myObstacle.push(new obstacle(myGameArea.canvas.width/2-100/Math.SQRT2, canvasHeight - gap, "red", 100, 20, "rotRect"));
+        }else{
+            myObstacle.push(new obstacle(myGameArea.canvas.width/2, canvasHeight - gap, "red", 200, 20, "rectangle", 1));
+        }
         canvasHeight -= gap;
         intialObstacleCount++;
     }
+    // myObstacle.push(new obstacle(myGameArea.canvas.width/2, 300, "red", 200, 20, "rectangle", 1));
+    // myObstacle.push(new obstacle(myGameArea.canvas.width/2, 300, "red", 200, 20, "rectangle", 4));
+    // myObstacle.push(new obstacle(myGameArea.canvas.width/2-100/Math.SQRT2, 300, "red", 100, 20, "rotRect"));
+
     myColorSwitch.push(new colorSwitch(myGameArea.canvas.width/2, myGameArea.canvas.height + 150, 2));
     myScore = new rectangle(myGameArea.canvas.width/40, myGameArea.canvas.height/15, "white", "40px", "Consolas", "score");
     jumpSound = new sound("./assets/sounds/jump.wav");
@@ -773,8 +892,19 @@ function updateGameArea(){
     // }
     if(myObstacle[myObstacle.length-1].y > 200){
         var parts = randomIntFromRange(2, 4);
-        myObstacle.push(new obstacle(myGameArea.canvas.width/2, -100, "red", 0, Math.PI, "circle", parts, myObstacle.length));
-        myColorSwitch.push(new colorSwitch(myGameArea.canvas.width/2, 50, parts));
+        // myObstacle.push(new obstacle(myGameArea.canvas.width/2, -100, "red", 0, Math.PI, "ring", parts, myObstacle.length));
+        var random = randomIntFromRange(0,4);
+        if(random < 3){
+            myObstacle.push(new obstacle(myGameArea.canvas.width/2, -100, "red", 0, Math.PI, "ring", random+2, myObstacle.length));
+            myColorSwitch.push(new colorSwitch(myGameArea.canvas.width/2, 50, random+2));
+        }else if(random == 3){
+            myObstacle.push(new obstacle(myGameArea.canvas.width/2-100/Math.SQRT2, -100, "red", 100, 20, "rotRect"));
+            myColorSwitch.push(new colorSwitch(myGameArea.canvas.width/2, 50, 4));
+        }else{
+            myObstacle.push(new obstacle(myGameArea.canvas.width/2, -100, "red", 200, 20, "rectangle", 1));
+            myColorSwitch.push(new colorSwitch(myGameArea.canvas.width/2, 50, 2));
+        }
+        
         // console.log(myObstacle);
     }
     if(myObstacle.length + 1 > bestScore && !(bestScoreUpdate)){
@@ -860,4 +990,11 @@ function shuffle(array){
         array[j] = k;
     }
     return array;
+}
+
+function everyInterval(n){
+    if((myGameArea.frameNo / n)%1 == 0){
+        return true;
+    }
+    return false;
 }
