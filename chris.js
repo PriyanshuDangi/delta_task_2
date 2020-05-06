@@ -270,7 +270,8 @@ function component(x, y, color){
             
                         if(otherObs.firstTime == 0){
                             otherObs.firstTime++;
-                            score++;
+                            // score++;
+                            score += dScore;
                         }
                     }else{
                         myGameArea.stop();
@@ -298,7 +299,8 @@ function component(x, y, color){
             
                     if(otherObs.firstTime == 0){
                         otherObs.firstTime++;
-                        score++;
+                        // score++;
+                        score += dScore;
                     }
                 }else{
                     myGameArea.stop();
@@ -347,7 +349,8 @@ function component(x, y, color){
         
                         if(otherObs.firstTime == 0){
                             otherObs.firstTime++;
-                            score++;
+                            // score++;
+                            score += dScore;
                         }
                     }
                 }else{
@@ -356,7 +359,8 @@ function component(x, y, color){
         
                         if(otherObs.firstTime == 0){
                             otherObs.firstTime++;
-                            score++;
+                            // score++;
+                            score += dScore;
                         }
                     } else{
                         myGameArea.stop();
@@ -446,7 +450,7 @@ function obstacle(x, y, color, angle1, angle2, type, parts, number){
             this.radians = 2*Math.PI;
             this.velocity = -0.03;
         }
-        this.velocity += (this.velocity/3)*parseInt(this.number/5);
+        // this.velocity += (this.velocity/3)*parseInt(this.number/5);
     }
 
     this.update = function(){
@@ -455,6 +459,7 @@ function obstacle(x, y, color, angle1, angle2, type, parts, number){
                 this.radians = 2*Math.PI;
             }
             this.radians += this.velocity;
+            console.log(this.velocity);
         }else if(this.type == "rotRect"){
             this.angle += 1 * Math.PI / 180;
         }
@@ -595,7 +600,7 @@ function sound(src) {
     document.body.appendChild(this.sound);
     this.play = function(){
     //   console.log(this.sound);
-    //   this.sound.play();
+      this.sound.play();
     }
     this.stop = function(){
       this.sound.pause();
@@ -754,7 +759,65 @@ function imageButton(src1, src2, x, y, width, height){
         // }
     }
 }
+function powerup(src, x, y, width, height, type){
+    this.src = src;
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.type = type;
+    this.dy = 0;
+    this.image = new Image();
 
+    this.draw = function(){
+        var ctx = myGameArea.context;
+        ctx.drawImage(this.src, this.x - this.width/2, this.y - this.height/2, this.width, this.height);
+    }
+
+    this.update = function(){
+        if(this.y - this.yOnTap > 35){
+            this.dy = 0;
+        }
+        this.y += this.dy;
+        this.draw();
+    }
+
+    this.crashWith = function(otherObj){
+        var myTop = this.y - this.height/2;
+        var myBottom = this.y + this.height/2;
+        var otherTop = otherObj.y - otherObj.radius;
+        var otherBottom = otherObj.y + (otherObj.radius);
+        if((myBottom < otherTop) || (myTop > otherBottom)){
+            // crash = false;
+            // console.log("hey");
+        } else{
+            if(this.type == "plus5"){
+                score +=5;
+            }else if(this.type == "slowmo"){
+                var c = 0;
+                myObstacle.forEach((obstacle)=>{
+                    obstacle.velocity = obstacle.velocity/3;
+                    c++;
+                })
+                setTimeout(function(){
+                    myObstacle.forEach((obstacle,index)=>{
+                        if(index<c){
+                            obstacle.velocity = obstacle.velocity*3;
+                        }
+                        
+                    })
+                }, 5000)
+            }else if(this.type == "doubleScore"){
+                dScore = 2;
+                setTimeout(function(){
+                    dScore = 1;
+                }, 5000)
+            }
+            myPowerUps.shift();
+        }
+        // return crash;
+    }
+}
 var canvasElement;
 function startScreen(){
     myGameArea.start();
@@ -800,14 +863,19 @@ function screen(){
 var gamePiece;
 var myObstacle = [];
 var myColorSwitch = [];
+var myPowerUps = [];
 var jumpSound;
 var backgroundMusic;
 var deadSound;
 var myScore;
+var dScore = 1;
 var pauseandplay;
 var soundOnAndOff;
 var bestScoreUpdate;
 var intialObstacleCount;
+var plus5 = document.getElementById("plus5");
+var slowmo = document.getElementById("slowmo");
+var doubleScore = document.getElementById("doubleScore");
 function init(){
     // gamestate = 1;
     canvasElement.removeEventListener('click', screen);
@@ -818,15 +886,21 @@ function init(){
     intialObstacleCount = 0;
     myObstacle = [];
     myColorSwitch = [];
+    myPowerUps = [];
     score = 0 ;
     var color = randomColor(color2);
     gamePiece = new component(myGameArea.canvas.width/2, myGameArea.canvas.height -100, color);
+
+    // console.log(plus5);
     var canvasHeight = myGameArea.canvas.height;
     var gap = 300;
     while(canvasHeight > 200){
         var random = randomIntFromRange(0,4);
         if(random < 3){
             myObstacle.push(new obstacle(myGameArea.canvas.width/2, canvasHeight - gap, "red", 0, Math.PI, "ring", random+2));
+            // myPowerUps.push(new powerup(plus5, myGameArea.canvas.width/2, canvasHeight - gap, 50, 50, "plus5"));
+            // myPowerUps.push(new powerup(slowmo, myGameArea.canvas.width/2, canvasHeight - gap, 50, 50, "slowmo"));
+            // myPowerUps.push(new powerup(doubleScore, myGameArea.canvas.width/2, canvasHeight - gap, 50, 50, "doubleScore"));
         }else if(random == 3){
             myObstacle.push(new obstacle(myGameArea.canvas.width/2-100/Math.SQRT2, canvasHeight - gap, "red", 100, 20, "rotRect"));
         }else{
@@ -839,7 +913,7 @@ function init(){
     // myObstacle.push(new obstacle(myGameArea.canvas.width/2, 300, "red", 200, 20, "rectangle", 4));
     // myObstacle.push(new obstacle(myGameArea.canvas.width/2-100/Math.SQRT2, 300, "red", 100, 20, "rotRect"));
 
-    myColorSwitch.push(new colorSwitch(myGameArea.canvas.width/2, myGameArea.canvas.height + 150, 2));
+    // myColorSwitch.push(new colorSwitch(myGameArea.canvas.width/2, myGameArea.canvas.height + 150, 2));
     myScore = new rectangle(myGameArea.canvas.width/40, myGameArea.canvas.height/15, "white", "40px", "Consolas", "score");
     jumpSound = new sound("./assets/sounds/jump.wav");
     deadSound = new sound("./assets/sounds/dead.wav");
@@ -873,6 +947,9 @@ function updateGameArea(){
     for(var j=0; j<myColorSwitch.length; j++){
         myColorSwitch[j].crashWith(gamePiece);
     }
+    for(var k=0; k<myPowerUps.length; k++){
+        myPowerUps[k].crashWith(gamePiece);
+    }
     myGameArea.frameNo++;
     // if(everyInterval(100) || myGameArea.frameNo == 1){
     //     hey += -500;
@@ -894,8 +971,20 @@ function updateGameArea(){
         var parts = randomIntFromRange(2, 4);
         // myObstacle.push(new obstacle(myGameArea.canvas.width/2, -100, "red", 0, Math.PI, "ring", parts, myObstacle.length));
         var random = randomIntFromRange(0,4);
+        var powerProb = randomIntFromRange(0,1);
         if(random < 3){
             myObstacle.push(new obstacle(myGameArea.canvas.width/2, -100, "red", 0, Math.PI, "ring", random+2, myObstacle.length));
+            if(powerProb){
+                var prob = randomIntFromRange(0,2);
+                if(prob == 0){
+                    myPowerUps.push(new powerup(plus5, myGameArea.canvas.width/2, -100, 50, 50, "plus5"));
+                }else if(prob == 1){
+                    myPowerUps.push(new powerup(slowmo, myGameArea.canvas.width/2, -100, 50, 50, "slowmo"));
+                }else if(prob == 2){
+                    myPowerUps.push(new powerup(doubleScore, myGameArea.canvas.width/2, -100, 50, 50, "doubleScore"));
+                }
+            }
+            
             myColorSwitch.push(new colorSwitch(myGameArea.canvas.width/2, 50, random+2));
         }else if(random == 3){
             myObstacle.push(new obstacle(myGameArea.canvas.width/2-100/Math.SQRT2, -100, "red", 100, 20, "rotRect"));
@@ -907,13 +996,14 @@ function updateGameArea(){
         
         // console.log(myObstacle);
     }
-    if(myObstacle.length + 1 > bestScore && !(bestScoreUpdate)){
+    if(score + 1 >= bestScore && bestScore > 0 && !(bestScoreUpdate)){
         // console.log(myObstacle.length)
-        if(bestScore <= intialObstacleCount){
-            var index = bestScore-1;
-        }else{
-            var index = myObstacle.length - 1;
-        }
+        // if(bestScore <= intialObstacleCount){
+        //     var index = bestScore-1;
+        // }else{
+        //     var index = bestScore - 1;
+        // }
+        var index = bestScore - 1;
         var height = myObstacle[index].y - 150;
         bestScoreUpdate = new rectangle(0, height, "#FF0000", myGameArea.canvas.width, 2, "bestscore");
     }
@@ -925,6 +1015,9 @@ function updateGameArea(){
     })
     myObstacle.forEach((obstacle)=>{
         obstacle.update();
+    })
+    myPowerUps.forEach((powerup)=>{
+        powerup.update();
     })
     // myObstacle.update();
     // myObstacle1.update();
@@ -956,6 +1049,10 @@ function jumpClickFunction(){
     myColorSwitch.forEach((particle)=>{
         particle.yOnTap = particle.y;
         particle.dy = 3;
+    })
+    myPowerUps.forEach((powerup)=>{
+        powerup.yOnTap = powerup.y;
+        powerup.dy = 3;
     })
     if(bestScoreUpdate){
         bestScoreUpdate.yOnTap = bestScoreUpdate.y;
