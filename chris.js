@@ -17,9 +17,9 @@ var myGameArea = {
         clearInterval(this.interval);
         canvasElement.removeEventListener('click', jumpClickFunction);
         canvasElement.removeEventListener('click', clickImage);
+        deadSound.play();
         backgroundMusic.stop();
         bestScoreFunction();
-        deadSound.play();
         if(bestScore){
             if(bestScore <  score){
                 localStorage.setItem('colorswitch', JSON.stringify(score));
@@ -37,7 +37,6 @@ var myGameArea = {
             var centerWidth = myGameArea.canvas.width/2;
             var centerHeight = myGameArea.canvas.height/2;
             ctx.fillRect(centerWidth - 135, centerHeight-50, 270, 100);
-            // ctx.fillRect(200, 250, 250, 1);
             ctx.font = "25px Consolas";
             ctx.fillStyle = "white";
             ctx.textContent = "center";
@@ -48,21 +47,16 @@ var myGameArea = {
                 ctx.fillText("click anywhere to play again", centerWidth, centerHeight + 40);
                 canvasElement.addEventListener('click', screen);
             },700)
-        }, 100);
-        
-        
+        }, 100);    
     }
 }
 
-// var gamestate = 1;
 var score = 0;
 const mouse = {
     x: myGameArea.canvas.width,
     y: myGameArea.canvas.height
 }
 var toggle;
-// var soundtoggle;
-// addEventListener('click', clickImage);
 
 function clickImage(e){
     mouse.x = event.x;
@@ -71,32 +65,28 @@ function clickImage(e){
     pauseandplay.update();
     if(toggle){
         canvasElement.removeEventListener('click', jumpClickFunction);
-        // console.log(toggle);
-        // console.log(pauseandplay.state);
         if(pauseandplay.state == 0){ //pause
             clearInterval(myGameArea.interval);
-            // canvasElement.removeEventListener('click', jumpClickFunction);
+            var ctx = myGameArea.context;
+            ctx.fillStyle = "rgba(1,1,1,0.7)";
+            ctx.fillRect(myGameArea.canvas.width/2 - 150, myGameArea.canvas.height/2-50, 300, 100);
+            ctx.font = "40px Consolas";
+            ctx.fillStyle = "white";
+            ctx.textContent = "center";
+            ctx.fillText("Paused", myGameArea.canvas.width/2, myGameArea.canvas.height/2-10);
+            ctx.font = "15px Consolas";
+            ctx.fillText("Click the icon again to resume", myGameArea.canvas.width/2, myGameArea.canvas.height/2+20);
         }else{ //play
             setTimeout(function(){
                 canvasElement.addEventListener('click', jumpClickFunction);
                 myGameArea.intervalFunction();
             }, 300);
-            // canvasElement.addEventListener('click', jumpClickFunction);
         }
     }
-
-    // soundtoggle = soundOnAndOff.check();
-    // soundOnAndOff.update();
-    // if(soundtoggle){
-    //     if(soundOnAndOff.state == 0){ //pause
-    //         soundVolume(0);
-    //     }else{ //play
-    //         soundVolume(1);
-    //     }
-    // }
 }
 
-var color2 = ["red", "blue"];
+// var color2 = ["red", "blue"];
+var color2 = ["#FAE100", "#32DBF0"];
 var colorAngle2 = [
     {
         bottom: {
@@ -122,7 +112,8 @@ var colorAngle2 = [
 ]
 
 
-var color3 = ["red", "blue", "yellow"];
+// var color3 = ["red", "blue", "yellow"];
+var color3 = ["#FAE100", "#32DBF0", "#FF0181"];
 var colorAngle3 = [
     {
         bottom: {
@@ -156,7 +147,8 @@ var colorAngle3 = [
     }
 ]
 
-var color4 = ["red", "blue", "yellow", "green"];
+// var color4 = ["red", "blue", "yellow", "green"];
+var color4 = ["#FAE100", "#32DBF0", "#FF0181", "#900DFF"];
 var colorAngle4 = [
     {
         bottom: {
@@ -197,22 +189,16 @@ var colorAngle4 = [
     }
 ]
 
-function component(x, y, color){
+function component(x, y){
     this.x = x;
     this.y = y;
     this.radius = 10;
     this.dy = 0;
     this.gravity = 0.09;
     this.count = 0;
-    this.color = color;
+    this.color = randomColor(color2);
 
     this.update = function(){
-
-        // if(this.y +  this.radius + this.dy> myGameArea.canvas.height - 50){
-        //     // this.dy = -this.dy; 
-        // } else{
-        //     this.dy += this.gravity;
-        // }
         this.dy += this.gravity;
         if(gamePieceYOnTap - gamePiece.y > 30){
             this.dy = -this.dy;
@@ -232,16 +218,14 @@ function component(x, y, color){
 
     this.hitBottom = function(){
         var rockBottom = myGameArea.canvas.height - 100;
-        if(this.y>=rockBottom  && (!gamePieceYOnTap)){
+        if(this.y>=rockBottom  && (score == 0)){
             this.y = rockBottom;
             this.dy = 0;
-            // this.gravitySpeed = -(this.gravitySpeed * 1);
         }
         if(gamePieceYOnTap && this.y + this.radius + this.dy >= myGameArea.canvas.height){
             this.y = myGameArea.canvas.height - this.radius;
             myGameArea.stop();
         }
-        this.draw();
     }
 
     this.crashWith = function(otherObs){
@@ -261,7 +245,6 @@ function component(x, y, color){
             var otherBottom = otherObs.y + (otherObs.angle2);
             if((myBottom < otherTop) || (myTop > otherBottom)){
                 // crash = false;
-                // console.log("hii");
             } else{
                 // console.log("hey");
                     if(otherObs.parts == 1){
@@ -278,20 +261,16 @@ function component(x, y, color){
                     }
                 }  
             }
-            // return crash;
         }else if(otherObs.type == "rotRect"){
             var angle = (otherObs.angle+(Math.PI/4))%(Math.PI/2);
             var angleCheck = (otherObs.angle+(Math.PI/4))%(Math.PI*2);
             var myTop = this.y - this.radius;
             var myBottom = this.y + (this.radius);
             var otherTop = otherObs.y + (100/Math.SQRT2)*Math.tan(angle - (Math.PI/4));
-            var otherBottom = otherObs.y + (100/Math.SQRT2)*Math.tan(angle - (Math.PI/4)) + 20;
+            var otherBottom = otherObs.y + (100/Math.SQRT2)*Math.tan(angle - (Math.PI/4)) + 15;
             if((myBottom < otherTop) || (myTop > otherBottom)){
                 // crash = false;
-                // console.log("hii");
-                // myGameArea.stop();
             } else{
-                // console.log("hey");
                 var ballColor = this.color;
                 var colorIndex = color4.indexOf(ballColor);
                 if(angleCheck >= colorIndex*(Math.PI/2) && angleCheck < (colorIndex+1)*(Math.PI/2)){
@@ -299,14 +278,12 @@ function component(x, y, color){
             
                     if(otherObs.firstTime == 0){
                         otherObs.firstTime++;
-                        // score++;
                         score += dScore;
                     }
                 }else{
                     myGameArea.stop();
                 }  
             }
-
         }
     }
 
@@ -315,14 +292,13 @@ function component(x, y, color){
             var ballColor = this.color; 
             var colorIndex = color.indexOf(ballColor);
             if(colorIndex == -1){
-                // return;
                 var bottomAngle1 = -1;
                 var bottomAngle2 = -1;
                 var topAngle1 = -1;
                 var topAngle2 = -1;
                 var bottomAngle3 = false;
                 var topAngle3 = false;
-            }else{      
+            }else{
                 var bottomAngle1 = colorAngle[colorIndex].bottom.angle1;
                 var bottomAngle2 = colorAngle[colorIndex].bottom.angle2;
                 var bottomAngle3 = colorAngle[colorIndex].bottom.angle3;
@@ -349,7 +325,6 @@ function component(x, y, color){
         
                         if(otherObs.firstTime == 0){
                             otherObs.firstTime++;
-                            // score++;
                             score += dScore;
                         }
                     }
@@ -359,7 +334,6 @@ function component(x, y, color){
         
                         if(otherObs.firstTime == 0){
                             otherObs.firstTime++;
-                            // score++;
                             score += dScore;
                         }
                     } else{
@@ -425,7 +399,7 @@ function component(x, y, color){
     }
 }
 
-function obstacle(x, y, color, angle1, angle2, type, parts, number){
+function obstacle(x, y, angle1, angle2, type, parts, number){
     this.x = x;
     this.y = y;
     this.color = randomColor(color2);
@@ -441,7 +415,7 @@ function obstacle(x, y, color, angle1, angle2, type, parts, number){
     this.count = 0;
     this.firstTime = 0;
 
-    this.angle =  - Math.PI/4;  //for four rotRect
+    this.angle =  -Math.PI/4;  //for four rotRect
     if(this.type == "ring"){
         if(randomIntFromRange(0,1)){
             this.radians = 0;
@@ -450,7 +424,7 @@ function obstacle(x, y, color, angle1, angle2, type, parts, number){
             this.radians = 2*Math.PI;
             this.velocity = -0.03;
         }
-        // this.velocity += (this.velocity/3)*parseInt(this.number/5);
+        this.velocity += (this.velocity/3)*parseInt(this.number/5);
     }
 
     this.update = function(){
@@ -459,7 +433,6 @@ function obstacle(x, y, color, angle1, angle2, type, parts, number){
                 this.radians = 2*Math.PI;
             }
             this.radians += this.velocity;
-            console.log(this.velocity);
         }else if(this.type == "rotRect"){
             this.angle += 1 * Math.PI / 180;
         }
@@ -477,70 +450,70 @@ function obstacle(x, y, color, angle1, angle2, type, parts, number){
                 
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, angle1 + this.radians, angle2+this.radians);
-                ctx.strokeStyle = "red";
+                ctx.strokeStyle = color4[0];
                 ctx.lineWidth = this.lineWidth;
                 ctx.stroke();
         
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, Math.PI + this.radians, Math.PI*2+ this.radians);
-                ctx.strokeStyle = "blue";
+                ctx.strokeStyle = color4[1];
                 ctx.lineWidth = this.lineWidth;
                 ctx.stroke();
             } else if(this.parts == 3){
                 
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, angle1 + this.radians, Math.PI*2/3 + this.radians);
-                ctx.strokeStyle = "red";
+                ctx.strokeStyle = color4[0];
                 ctx.lineWidth = this.lineWidth;
                 ctx.stroke();
         
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, Math.PI*2/3 + this.radians, Math.PI*4/3+ this.radians);
-                ctx.strokeStyle = "blue";
+                ctx.strokeStyle = color4[1];
                 ctx.lineWidth = this.lineWidth;
                 ctx.stroke();
         
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, Math.PI*4/3 + this.radians, Math.PI*2+ this.radians);
-                ctx.strokeStyle = "yellow";
+                ctx.strokeStyle = color4[2];
                 ctx.lineWidth = this.lineWidth;
                 ctx.stroke();
             } else if(this.parts == 4){
                 
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, 0 + this.radians, Math.PI/2 +this.radians);
-                ctx.strokeStyle = "red";
+                ctx.strokeStyle = color4[0];
                 ctx.lineWidth = this.lineWidth;
                 ctx.stroke();
     
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, Math.PI/2 + this.radians, Math.PI+ this.radians);
-                ctx.strokeStyle = "blue";
+                ctx.strokeStyle = color4[1];
                 ctx.lineWidth = this.lineWidth;
                 ctx.stroke();
     
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, Math.PI + this.radians, 3*Math.PI/2 +this.radians);
-                ctx.strokeStyle = "yellow";
+                ctx.strokeStyle = color4[2];
                 ctx.lineWidth = this.lineWidth;
                 ctx.stroke();
     
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, 3*Math.PI/2 + this.radians, 2*Math.PI+ this.radians);
-                ctx.strokeStyle = "green";
+                ctx.strokeStyle = color4[3];
                 ctx.lineWidth = this.lineWidth;
                 ctx.stroke();
             }else{
                 
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, angle1 + this.radians, angle2+this.radians);
-                ctx.strokeStyle = "red";
+                ctx.strokeStyle = color4[0];
                 ctx.lineWidth = this.lineWidth;
                 ctx.stroke();
         
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, Math.PI + this.radians, Math.PI*2+ this.radians);
-                ctx.strokeStyle = "blue";
+                ctx.strokeStyle = color4[1];
                 ctx.lineWidth = this.lineWidth;
                 ctx.stroke();
             }
@@ -548,7 +521,6 @@ function obstacle(x, y, color, angle1, angle2, type, parts, number){
             if(this.parts == 1){
                 ctx.beginPath();
                 if(everyInterval(100)){
-                    // this.color = randomColor(color2);
                     this.color = this.color == color2[0] ? color2[1] : color2[0];
                 }
                 ctx.fillStyle = this.color;
@@ -556,42 +528,42 @@ function obstacle(x, y, color, angle1, angle2, type, parts, number){
                 ctx.fill();
             }
         }else if(this.type == "rotRect"){
-            var c = myGameArea.context;
-            c.save();
-            c.translate(this.x, this.y);        
-            c.rotate(this.angle);
-            c.fillStyle = "red";
-            c.fillRect(0, 0, 100, 20);        
-            c.restore();
+            var ctx = myGameArea.context;
+            ctx.save();
+            ctx.translate(this.x, this.y);        
+            ctx.rotate(this.angle);
+            ctx.fillStyle = color4[0];
+            ctx.fillRect(0, 0, 100, 20);        
+            ctx.restore();
             
-            c.save();
-            c.translate(this.x, this.y);        
-            c.rotate(Math.PI/2 + this.angle);
-            c.fillStyle = "green";
-            c.fillRect(0, 0, 100, 20);        
-            c.restore();
+            ctx.save();
+            ctx.translate(this.x, this.y);        
+            ctx.rotate(Math.PI/2 + this.angle);
+            ctx.fillStyle = color4[3];
+            ctx.fillRect(0, 0, 100, 20);        
+            ctx.restore();
             
-            c.save();
-            c.translate(this.x, this.y);        
-            c.rotate(Math.PI + this.angle);
-            c.fillStyle = "yellow";
-            c.fillRect(0, 0, 100, 20);        
-            c.restore();
+            ctx.save();
+            ctx.translate(this.x, this.y);        
+            ctx.rotate(Math.PI + this.angle);
+            ctx.fillStyle = color4[2];
+            ctx.fillRect(0, 0, 100, 20);        
+            ctx.restore();
 
-            c.save();
-            c.translate(this.x, this.y);        
-            c.rotate(3*Math.PI/2 + this.angle);
-            c.fillStyle = "blue";
-            c.fillRect(0, 0, 100, 20);        
-            c.restore();
-
-            // c.fillRect(innerWidth/2, 0, 2, innerHeight);
-            // c.fill();
+            ctx.save();
+            ctx.translate(this.x, this.y);        
+            ctx.rotate(3*Math.PI/2 + this.angle);
+            ctx.fillStyle = color4[1];
+            ctx.fillRect(0, 0, 100, 20);        
+            ctx.restore();
         }
     }
 }
 
-function sound(src) {
+var backgroundMusic = new sound("./assets/sounds/background.mp3");
+var jumpSound = new sound("./assets/sounds/jump.wav");
+var deadSound = new sound("./assets/sounds/dead.wav");
+function sound(src){
     this.sound = document.createElement("audio");
     this.sound.src = src;
     this.sound.setAttribute("preload", "auto");
@@ -599,7 +571,6 @@ function sound(src) {
     this.sound.style.display = "none";
     document.body.appendChild(this.sound);
     this.play = function(){
-    //   console.log(this.sound);
       this.sound.play();
     }
     this.stop = function(){
@@ -615,6 +586,7 @@ function rectangle(x, y, color, width, height, type){
     this.height = height;
     this.type = type;
     this.dy = 0;
+
     this.draw = function(){
         var ctx = myGameArea.context;
         if(this.type == "score"){
@@ -633,6 +605,7 @@ function rectangle(x, y, color, width, height, type){
             ctx.fillRect(this.x, this.y, this.width, this.height);
         }
     }
+
     this.update = function(){
         this.radians += this.velocity;
         if(this.y - this.yOnTap > 35){
@@ -641,7 +614,6 @@ function rectangle(x, y, color, width, height, type){
         this.y += this.dy;
         this.draw();
     }
-
 }
 
 function colorSwitch(x, y, parts){
@@ -662,48 +634,33 @@ function colorSwitch(x, y, parts){
     this.draw = function(){
         var ctx = myGameArea.context;
         ctx.beginPath();
-        // ctx.lineWidth = 10;
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI/2);
-        // ctx.fillStyle = color4[0];
-        // ctx.fill();
         ctx.strokeStyle = color4[0];
         ctx.stroke();
 
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, Math.PI/2, Math.PI);
-        // ctx.fillStyle = color4[1];
-        // ctx.fill();
         ctx.strokeStyle = color4[1];
         ctx.stroke();
 
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, Math.PI, 3*Math.PI/2);
-        // ctx.fillStyle = color4[2];
-        // ctx.fill();
         ctx.strokeStyle = color4[2];
         ctx.stroke();
 
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 3*Math.PI/2, Math.PI*2);
-        // ctx.fillStyle = color4[3];
-        // ctx.fill();
         ctx.strokeStyle = color4[3];
         ctx.stroke();
     }
     
     this.crashWith = function(otherObj){
-        // var myLeft = this.x;
-        // var myRight = this.x + (this.width);
         var myTop = this.y - this.radius;
         var myBottom = this.y + (this.radius);
-        // var otherLeft = otherObj.x;
-        // var otherRight = otherObj.x + (otherObj.width);
         var otherTop = otherObj.y - otherObj.radius;
         var otherBottom = otherObj.y + (otherObj.radius);
-        // var crash = true;
         if((myBottom < otherTop) || (myTop > otherBottom)){
             // crash = false;
-            // console.log("hey");
         } else{
             if(this.parts == 3){
                 gamePiece.color = randomColor(color3);
@@ -714,12 +671,10 @@ function colorSwitch(x, y, parts){
             }
             myColorSwitch.shift();
         }
-        // return crash;
     }
 }
 
 function imageButton(src1, src2, x, y, width, height){
-    // this.src = src1;
     this.x = x;
     this.y = y;
     this.width = width;
@@ -727,20 +682,11 @@ function imageButton(src1, src2, x, y, width, height){
     this.state = 1;
 
     this.image = new Image();
-    // this.image.src = src;.
-    // console.log(this.src);
     this.draw = function(){
         var ctx = myGameArea.context;
-        // ctx.drawImage(this.image.src, this.x, this.y, this.width, this.height);
         ctx.drawImage(this.src, this.x, this.y, this.width, this.height);
     }
     this.update = function(){
-        // if(this.state == 1){
-        //     if(mouse.x - (this.x + this.width/2) <= this.width && mouse.x - (this.x + this.width/2) >= -this.width && mouse.y - (this.y + this.height/2) <= this.height && mouse.y - (this.y + this.height/2) >= -this.height){
-        //         console.log("hello");
-        //         this.state = 0;
-        //     }
-        // }
         if(this.state == 1){
             this.src = src1;
         }else{
@@ -749,22 +695,20 @@ function imageButton(src1, src2, x, y, width, height){
         this.draw();
     }
     this.check = function(){
-        // if(this.state == 1){
             if(mouse.x - (this.x + this.width/2) <= this.width/2 && mouse.x - (this.x + this.width/2) >= -this.width/2 && mouse.y - (this.y + this.height/2) <= this.height/2 && mouse.y - (this.y + this.height/2) >= -this.height/2){
-                // console.log("hello");
                 this.state = this.state == 1 ? 0 : 1;
                 return true;
             }
             return false;
-        // }
     }
 }
-function powerup(src, x, y, width, height, type){
+
+function powerup(src, x, type){
     this.src = src;
     this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
+    this.y = -100;
+    this.width = 50;
+    this.height = 50;
     this.type = type;
     this.dy = 0;
     this.image = new Image();
@@ -789,7 +733,6 @@ function powerup(src, x, y, width, height, type){
         var otherBottom = otherObj.y + (otherObj.radius);
         if((myBottom < otherTop) || (myTop > otherBottom)){
             // crash = false;
-            // console.log("hey");
         } else{
             if(this.type == "plus5"){
                 score +=5;
@@ -815,7 +758,6 @@ function powerup(src, x, y, width, height, type){
             }
             myPowerUps.shift();
         }
-        // return crash;
     }
 }
 var canvasElement;
@@ -830,20 +772,16 @@ function startScreen(){
     ctx.textAlign = "center";
     ctx.fillStyle = "black";
     var width = 400;
-    // ctx.fillRect(centerWidth, 100, width, 1);
-    // ctx.fillRect(centerWidth, 300, width, 1);
     var centerWidth = myGameArea.canvas.width/2;
     var centerHeight = myGameArea.canvas.height/2;
     ctx.font = "25px Consolas";
     ctx.fillStyle = "black";
     ctx.textContent = "center";
-    ctx.fillText("Instructions:", centerWidth, 130)
-    // ctx.fillText("Your score is "+score, 210, 190);
+    ctx.fillText("Instructions:", centerWidth, 130);
     ctx.font = "15px Consolas";
     ctx.fillText("1. Click to jump", centerWidth, 180);
     ctx.fillText("2. Don't Collide with other colour obstacle", centerWidth, 220);
     ctx.fillText("3. Click here to start the game", centerWidth, 260);
-    // gameStart();
     canvasElement = myGameArea.canvas;
     canvasElement.addEventListener('click', screen);
 }
@@ -852,7 +790,6 @@ startScreen();
 // to start the game on click
 function screen(){
     init();
-    backgroundMusic = new sound("./assets/sounds/background.mp3");
     backgroundMusic.sound.loop = true;
     backgroundMusic.sound.volume = 0.3;
     backgroundMusic.play();
@@ -864,84 +801,54 @@ var gamePiece;
 var myObstacle = [];
 var myColorSwitch = [];
 var myPowerUps = [];
-var jumpSound;
-var backgroundMusic;
-var deadSound;
 var myScore;
 var dScore = 1;
 var pauseandplay;
-var soundOnAndOff;
 var bestScoreUpdate;
 var intialObstacleCount;
+//images
 var plus5 = document.getElementById("plus5");
 var slowmo = document.getElementById("slowmo");
 var doubleScore = document.getElementById("doubleScore");
+var img1 = document.getElementById('pause'); //pause
+var img2 = document.getElementById('play'); //play
+
 function init(){
-    // gamestate = 1;
     canvasElement.removeEventListener('click', screen);
     canvasElement.addEventListener('click', jumpClickFunction);
     canvasElement.addEventListener('click', clickImage);
-    // myGameArea.start();
-    // myGameArea.intervalFunction();
+
+    //for new game when restart
     intialObstacleCount = 0;
     myObstacle = [];
     myColorSwitch = [];
     myPowerUps = [];
-    score = 0 ;
-    var color = randomColor(color2);
-    gamePiece = new component(myGameArea.canvas.width/2, myGameArea.canvas.height -100, color);
+    score = 0;
+    gamePiece = new component(myGameArea.canvas.width/2, myGameArea.canvas.height -100);
 
-    // console.log(plus5);
     var canvasHeight = myGameArea.canvas.height;
     var gap = 300;
     while(canvasHeight > 200){
         var random = randomIntFromRange(0,4);
         if(random < 3){
-            myObstacle.push(new obstacle(myGameArea.canvas.width/2, canvasHeight - gap, "red", 0, Math.PI, "ring", random+2));
-            // myPowerUps.push(new powerup(plus5, myGameArea.canvas.width/2, canvasHeight - gap, 50, 50, "plus5"));
-            // myPowerUps.push(new powerup(slowmo, myGameArea.canvas.width/2, canvasHeight - gap, 50, 50, "slowmo"));
-            // myPowerUps.push(new powerup(doubleScore, myGameArea.canvas.width/2, canvasHeight - gap, 50, 50, "doubleScore"));
+            myObstacle.push(new obstacle(myGameArea.canvas.width/2, canvasHeight - gap, 0, Math.PI, "ring", random+2));
         }else if(random == 3){
-            myObstacle.push(new obstacle(myGameArea.canvas.width/2-100/Math.SQRT2, canvasHeight - gap, "red", 100, 20, "rotRect"));
+            myObstacle.push(new obstacle(myGameArea.canvas.width/2-100/Math.SQRT2, canvasHeight - gap, 100, 20, "rotRect"));
         }else{
-            myObstacle.push(new obstacle(myGameArea.canvas.width/2, canvasHeight - gap, "red", 200, 20, "rectangle", 1));
+            myObstacle.push(new obstacle(myGameArea.canvas.width/2, canvasHeight - gap, 200, 20, "rectangle", 1));
         }
         canvasHeight -= gap;
         intialObstacleCount++;
     }
-    // myObstacle.push(new obstacle(myGameArea.canvas.width/2, 300, "red", 200, 20, "rectangle", 1));
-    // myObstacle.push(new obstacle(myGameArea.canvas.width/2, 300, "red", 200, 20, "rectangle", 4));
-    // myObstacle.push(new obstacle(myGameArea.canvas.width/2-100/Math.SQRT2, 300, "red", 100, 20, "rotRect"));
-
-    // myColorSwitch.push(new colorSwitch(myGameArea.canvas.width/2, myGameArea.canvas.height + 150, 2));
     myScore = new rectangle(myGameArea.canvas.width/40, myGameArea.canvas.height/15, "white", "40px", "Consolas", "score");
-    jumpSound = new sound("./assets/sounds/jump.wav");
-    deadSound = new sound("./assets/sounds/dead.wav");
-    var img1 = document.getElementById('pause');
-    var img2 = document.getElementById('play');
     pauseandplay = new imageButton(img1, img2, myGameArea.canvas.width - myGameArea.canvas.width/15, myGameArea.canvas.height/30, myGameArea.canvas.width/20, myGameArea.canvas.width/20);
-    // console.log(pauseandplay);
     bestScoreFunction();
     bestScoreUpdate = 0;
-    // var img3 = document.getElementById('soundon');
-    // var img4 = document.getElementById('soundof');
-    // soundOnAndOff = new imageButton(img3, img4, myGameArea.canvas.width - 2*myGameArea.canvas.width/15, myGameArea.canvas.height/30, myGameArea.canvas.width/20, myGameArea.canvas.width/20);
-    // // soundVolume(soundtoggle);
-    // if(!soundtoggle){
-    //     console.log(soundtoggle);
-    //     soundVolume(0);
-    // }
-    
 }
-// init();
 
-// var hey = 300;
-// var first = 1;
 function updateGameArea(){
-    // gamePiece.crashWith(myObstacle1);
     myGameArea.clear();
     for(var i=0; i < myObstacle.length; i++){
-        // if(gamePiece.y - myObstacle[i].y < myGameArea.canvas.height/2 && gamePiece.y - myObstacle[i].y > -myGameArea.canvas.height/2)
         gamePiece.crashWith(myObstacle[i]);
     }
     for(var j=0; j<myColorSwitch.length; j++){
@@ -951,60 +858,37 @@ function updateGameArea(){
         myPowerUps[k].crashWith(gamePiece);
     }
     myGameArea.frameNo++;
-    // if(everyInterval(100) || myGameArea.frameNo == 1){
-    //     hey += -500;
-    // myObstacle.push(new obstacle(200, -200, "red", 0, Math.PI));
-    //     console.log(myObstacle);
-    // }
-    // if(myGameArea.frameNo == 1){
-    //     myObstacle.push(new obstacle(200, -200, "red", 0, Math.PI));
-    // }
-    // if(myObstacle[0].y + 120 >= myGameArea.canvas.height - 50 && first == 1){
-    //     first++;
-    //     myObstacle.push(new obstacle(200, -100, "red", 0, Math.PI));
-    //     console.log(myObstacle);
-    // }else if(myObstacle[myObstacle.length-1].y + 120 == myGameArea.canvas.height){
-    //     myObstacle.push(new obstacle(200, -300, "red", 0, Math.PI));
-    //     console.log(myObstacle);
-    // }
     if(myObstacle[myObstacle.length-1].y > 200){
-        var parts = randomIntFromRange(2, 4);
-        // myObstacle.push(new obstacle(myGameArea.canvas.width/2, -100, "red", 0, Math.PI, "ring", parts, myObstacle.length));
+        var myObstacleY = -100;
         var random = randomIntFromRange(0,4);
         var powerProb = randomIntFromRange(0,1);
         if(random < 3){
-            myObstacle.push(new obstacle(myGameArea.canvas.width/2, -100, "red", 0, Math.PI, "ring", random+2, myObstacle.length));
+            myObstacle.push(new obstacle(myGameArea.canvas.width/2, myObstacleY , 0, Math.PI, "ring", random+2, myObstacle.length));
             if(powerProb){
                 var prob = randomIntFromRange(0,2);
                 if(prob == 0){
-                    myPowerUps.push(new powerup(plus5, myGameArea.canvas.width/2, -100, 50, 50, "plus5"));
+                    myPowerUps.push(new powerup(plus5, myGameArea.canvas.width/2, "plus5"));
                 }else if(prob == 1){
-                    myPowerUps.push(new powerup(slowmo, myGameArea.canvas.width/2, -100, 50, 50, "slowmo"));
+                    myPowerUps.push(new powerup(slowmo, myGameArea.canvas.width/2, "slowmo"));
                 }else if(prob == 2){
-                    myPowerUps.push(new powerup(doubleScore, myGameArea.canvas.width/2, -100, 50, 50, "doubleScore"));
+                    myPowerUps.push(new powerup(doubleScore, myGameArea.canvas.width/2, "doubleScore"));
                 }
             }
-            
             myColorSwitch.push(new colorSwitch(myGameArea.canvas.width/2, 50, random+2));
         }else if(random == 3){
-            myObstacle.push(new obstacle(myGameArea.canvas.width/2-100/Math.SQRT2, -100, "red", 100, 20, "rotRect"));
+            myObstacle.push(new obstacle(myGameArea.canvas.width/2-100/Math.SQRT2, myObstacleY , 100, 20, "rotRect"));
             myColorSwitch.push(new colorSwitch(myGameArea.canvas.width/2, 50, 4));
         }else{
-            myObstacle.push(new obstacle(myGameArea.canvas.width/2, -100, "red", 200, 20, "rectangle", 1));
+            myObstacle.push(new obstacle(myGameArea.canvas.width/2, myObstacleY , 200, 20, "rectangle", 1));
             myColorSwitch.push(new colorSwitch(myGameArea.canvas.width/2, 50, 2));
         }
-        
-        // console.log(myObstacle);
     }
-    if(score + 1 >= bestScore && bestScore > 0 && !(bestScoreUpdate)){
-        // console.log(myObstacle.length)
-        // if(bestScore <= intialObstacleCount){
-        //     var index = bestScore-1;
-        // }else{
-        //     var index = bestScore - 1;
-        // }
-        var index = bestScore - 1;
-        var height = myObstacle[index].y - 150;
+    if(score+1 > bestScore && !(bestScoreUpdate)){
+        if(score - bestScore > 2){
+            var height = gamePiece.y - 150;
+        }else{
+            var height = gamePiece.y - 250;
+        }
         bestScoreUpdate = new rectangle(0, height, "#FF0000", myGameArea.canvas.width, 2, "bestscore");
     }
     if(bestScoreUpdate){
@@ -1019,10 +903,7 @@ function updateGameArea(){
     myPowerUps.forEach((powerup)=>{
         powerup.update();
     })
-    // myObstacle.update();
-    // myObstacle1.update();
     myScore.draw();
-    // soundOnAndOff.update();
     pauseandplay.update();
     gamePiece.update();
 }
@@ -1035,40 +916,25 @@ function bestScoreFunction(){
 }
 
 var gamePieceYOnTap;
-// addEventListener('click', jumpClickFunction);
-
 function jumpClickFunction(){
-    // console.log('hi');
     jumpSound.play();
     gamePieceYOnTap = gamePiece.y;
     gamePiece.dy = -2;
-    myObstacle.forEach((obstacle)=>{
-        obstacle.yOnTap = obstacle.y;
-        obstacle.dy = 3;
-    })
-    myColorSwitch.forEach((particle)=>{
-        particle.yOnTap = particle.y;
-        particle.dy = 3;
-    })
-    myPowerUps.forEach((powerup)=>{
-        powerup.yOnTap = powerup.y;
-        powerup.dy = 3;
-    })
+    posUpOnJump(myObstacle);
+    posUpOnJump(myColorSwitch);
+    posUpOnJump(myPowerUps);
+
     if(bestScoreUpdate){
         bestScoreUpdate.yOnTap = bestScoreUpdate.y;
         bestScoreUpdate.dy = 3;
     }
-
-    // myObstacle.y +=7;
-    // myObstacle1.y +=7;
-    // gamePiece.gravity = -0.05;
 }
-
-// function soundVolume(volume){
-//     backgroundMusic.sound.volume = volume;
-//     jumpSound.sound.volume = volume;
-//     deadSound.sound.volume = volume;
-// }
+function posUpOnJump(objects){
+    objects.forEach((object)=>{
+        object.yOnTap = object.y;
+        object.dy = 3;
+    })
+}
 
 function randomIntFromRange(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min)
@@ -1076,17 +942,6 @@ function randomIntFromRange(min, max) {
 
 function randomColor(colors) {
     return colors[Math.floor(Math.random() * colors.length)]
-}
-
-function shuffle(array){
-    var i, j, k;
-    for(i=array.length-1; i>0; i--){
-        j = Math.floor(Math.random() * i);
-        k = array[i];
-        array[i] = array[j];
-        array[j] = k;
-    }
-    return array;
 }
 
 function everyInterval(n){
