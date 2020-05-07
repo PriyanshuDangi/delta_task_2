@@ -1,3 +1,5 @@
+function canvasStart(){
+
 var myGameArea = {
     canvas: document.createElement('canvas'),
     start: function(){
@@ -57,7 +59,7 @@ const mouse = {
     y: myGameArea.canvas.height
 }
 var toggle;
-
+//toggle the pause and play image on click
 function clickImage(e){
     mouse.x = event.x;
     mouse.y = event.y;
@@ -85,7 +87,7 @@ function clickImage(e){
     }
 }
 
-// var color2 = ["red", "blue"];
+//for the angles at corresponding colors
 var color2 = ["#FAE100", "#32DBF0"];
 var colorAngle2 = [
     {
@@ -110,9 +112,6 @@ var colorAngle2 = [
         }
     }
 ]
-
-
-// var color3 = ["red", "blue", "yellow"];
 var color3 = ["#FAE100", "#32DBF0", "#FF0181"];
 var colorAngle3 = [
     {
@@ -146,8 +145,6 @@ var colorAngle3 = [
         }
     }
 ]
-
-// var color4 = ["red", "blue", "yellow", "green"];
 var color4 = ["#FAE100", "#32DBF0", "#FF0181", "#900DFF"];
 var colorAngle4 = [
     {
@@ -188,7 +185,8 @@ var colorAngle4 = [
         }
     }
 ]
-
+//objects
+//main gamepiece ball
 function component(x, y){
     this.x = x;
     this.y = y;
@@ -576,7 +574,7 @@ function sound(src){
     this.stop = function(){
       this.sound.pause();
     }
-  }
+}
 
 function rectangle(x, y, color, width, height, type){
     this.x = x;
@@ -760,6 +758,7 @@ function powerup(src, x, type){
         }
     }
 }
+
 var canvasElement;
 function startScreen(){
     myGameArea.start();
@@ -797,6 +796,7 @@ function screen(){
     gamePieceYOnTap = 0;
 }
 
+//implementation
 var gamePiece;
 var myObstacle = [];
 var myColorSwitch = [];
@@ -841,11 +841,12 @@ function init(){
         intialObstacleCount++;
     }
     myScore = new rectangle(myGameArea.canvas.width/40, myGameArea.canvas.height/15, "white", "40px", "Consolas", "score");
-    pauseandplay = new imageButton(img1, img2, myGameArea.canvas.width - myGameArea.canvas.width/15, myGameArea.canvas.height/30, myGameArea.canvas.width/20, myGameArea.canvas.width/20);
+    pauseandplay = new imageButton(img1, img2, myGameArea.canvas.width - 60, 30, 70, 70);
     bestScoreFunction();
     bestScoreUpdate = 0;
 }
 
+//Animation Loop
 function updateGameArea(){
     myGameArea.clear();
     for(var i=0; i < myObstacle.length; i++){
@@ -949,4 +950,12 @@ function everyInterval(n){
         return true;
     }
     return false;
+}}
+
+
+//to start the game on click
+function play(){
+    var section = document.querySelector('section');
+    section.style.display = "none";
+    canvasStart();
 }
