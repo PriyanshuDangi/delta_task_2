@@ -1,7 +1,8 @@
 //images
-var plus5 = document.getElementById("plus5");
-var slowmo = document.getElementById("slowmo");
-var doubleScore = document.getElementById("doubleScore");
+var sprites = document.getElementById('sprites');
+// var plus5 = document.getElementById("plus5");
+// var slowmo = document.getElementById("slowmo");
+// var doubleScore = document.getElementById("doubleScore");
 //sounds
 var backgroundMusic = new sound("../assets/sounds/background.mp3");
 var jumpSound = new sound("../assets/sounds/jump.wav");
@@ -709,10 +710,15 @@ function colorSwitch(x, y, parts){
 //     }
 // }
 
-function powerup(src, x, type){
+function powerup(src, sx, sy, x, y, type){
     this.src = src;
+    this.sx = sx;
+    this.sy = sy;
+    this.sWidth = 540;
+    this.sHeight = 540;
     this.x = x;
-    this.y = -100;
+    // this.y = -100;
+    this.y = y;
     this.width = 50;
     this.height = 50;
     this.type = type;
@@ -721,8 +727,21 @@ function powerup(src, x, type){
 
     this.draw = function(){
         var ctx = myGameArea.context;
-        ctx.drawImage(this.src, this.x - this.width/2, this.y - this.height/2, this.width, this.height);
+        ctx.drawImage(this.src, this.sx, this.sy, this.sWidth, this.sHeight, this.x - this.width/2, this.y - this.height/2, this.width, this.height);
     }
+    // this.src = src;
+    // this.x = x;
+    // this.y = -100;
+    // this.width = 50;
+    // this.height = 50;
+    // this.type = type;
+    // this.dy = 0;
+    // this.image = new Image();
+
+    // this.draw = function(){
+    //     var ctx = myGameArea.context;
+    //     ctx.drawImage(this.src, this.x - this.width/2, this.y - this.height/2, this.width, this.height);
+    // }
 
     this.update = function(){
         if(this.y - this.yOnTap > 35){
@@ -859,11 +878,14 @@ function updateGameArea(){
             if(powerProb){
                 var prob = randomIntFromRange(0,2);
                 if(prob == 0){
-                    myPowerUps.push(new powerup(plus5, myGameArea.canvas.width/2, "plus5"));
+                    // myPowerUps.push(new powerup(plus5, myGameArea.canvas.width/2, "plus5"));
+                    myPowerUps.push(new powerup(sprites, 540, 0, myGameArea.canvas.width/2, -100, "plus5"));
                 }else if(prob == 1){
-                    myPowerUps.push(new powerup(slowmo, myGameArea.canvas.width/2, "slowmo"));
+                    // myPowerUps.push(new powerup(slowmo, myGameArea.canvas.width/2, "slowmo"));
+                    myPowerUps.push(new powerup(sprites, 0, 0, myGameArea.canvas.width/2, -100, "slowmo"));
                 }else if(prob == 2){
-                    myPowerUps.push(new powerup(doubleScore, myGameArea.canvas.width/2, "doubleScore"));
+                    // myPowerUps.push(new powerup(doubleScore, myGameArea.canvas.width/2, "doubleScore"));
+                    myPowerUps.push(new powerup(sprites, 0, 540, myGameArea.canvas.width/2, -100, "doubleScore"));
                 }
             }
             myColorSwitch.push(new colorSwitch(myGameArea.canvas.width/2, 50, random+2));
