@@ -21,10 +21,11 @@ function sound(src){
       this.sound.pause();
     }
 }
-
+//score for both the players
 var score1 = -1;
 var score2 = -1;
 
+//to start the game in two splits
 function split(orientation){
 var myGameArea = {
     canvas: document.createElement('canvas'),
@@ -211,6 +212,7 @@ var colorAngle4 = [
     }
 ]
 
+//the main game piece
 function component(x, y){
     this.x = x;
     this.y = y;
@@ -681,35 +683,6 @@ function colorSwitch(x, y, parts){
     }
 }
 
-// function imageButton(src1, src2, x, y, width, height){
-//     this.x = x;
-//     this.y = y;
-//     this.width = width;
-//     this.height = height;
-//     this.state = 1;
-
-//     this.image = new Image();
-//     this.draw = function(){
-//         var ctx = myGameArea.context;
-//         ctx.drawImage(this.src, this.x, this.y, this.width, this.height);
-//     }
-//     this.update = function(){
-//         if(this.state == 1){
-//             this.src = src1;
-//         }else{
-//             this.src = src2;
-//         }
-//         this.draw();
-//     }
-//     this.check = function(){
-//             if(mouse.x - (this.x + this.width/2) <= this.width/2 && mouse.x - (this.x + this.width/2) >= -this.width/2 && mouse.y - (this.y + this.height/2) <= this.height/2 && mouse.y - (this.y + this.height/2) >= -this.height/2){
-//                 this.state = this.state == 1 ? 0 : 1;
-//                 return true;
-//             }
-//             return false;
-//     }
-// }
-
 function powerup(src, sx, sy, x, y, type){
     this.src = src;
     this.sx = sx;
@@ -717,7 +690,6 @@ function powerup(src, sx, sy, x, y, type){
     this.sWidth = 540;
     this.sHeight = 540;
     this.x = x;
-    // this.y = -100;
     this.y = y;
     this.width = 50;
     this.height = 50;
@@ -729,19 +701,6 @@ function powerup(src, sx, sy, x, y, type){
         var ctx = myGameArea.context;
         ctx.drawImage(this.src, this.sx, this.sy, this.sWidth, this.sHeight, this.x - this.width/2, this.y - this.height/2, this.width, this.height);
     }
-    // this.src = src;
-    // this.x = x;
-    // this.y = -100;
-    // this.width = 50;
-    // this.height = 50;
-    // this.type = type;
-    // this.dy = 0;
-    // this.image = new Image();
-
-    // this.draw = function(){
-    //     var ctx = myGameArea.context;
-    //     ctx.drawImage(this.src, this.x - this.width/2, this.y - this.height/2, this.width, this.height);
-    // }
 
     this.update = function(){
         if(this.y - this.yOnTap > 35){
@@ -827,7 +786,7 @@ var myPowerUps = [];
 var myScore;
 var dScore = 1;
 var intialObstacleCount;
-
+//implementation
 function init(){
     canvasElement.removeEventListener('click', screen);
     canvasElement.addEventListener('click', jumpClickFunction);
@@ -857,6 +816,7 @@ function init(){
     myScore = new rectangle(50, 40, "white", "50px", "Consolas", "score");
 }
 
+//animation loop
 function updateGameArea(){
     myGameArea.clear();
     for(var i=0; i < myObstacle.length; i++){
@@ -943,6 +903,7 @@ function everyInterval(n){
     return false;
 }}
 
+//start the game when player clicks multiplayer
 function multistart(){
 if(score1 > -1){
     removeCanvas();
@@ -954,6 +915,7 @@ split(-1);
 }
 multistart();
 
+//to remove canvas after reloading
 function removeCanvas(){
     document.querySelector('body').removeEventListener('click', multistart);
     var canvas = document.querySelectorAll('canvas');

@@ -54,6 +54,7 @@ var myGameArea = {
 }
 
 var score = 0;
+//mouse cordinates on click
 const mouse = {
     x: myGameArea.canvas.width,
     y: myGameArea.canvas.height
@@ -87,7 +88,7 @@ function clickImage(e){
     }
 }
 
-//for the angles at corresponding colors
+//for the angles for ring at corresponding colors
 var color2 = ["#FAE100", "#32DBF0"];
 var colorAngle2 = [
     {
@@ -819,6 +820,7 @@ var sprites = document.getElementById('sprites');
 var img1 = document.getElementById('pause'); //pause
 var img2 = document.getElementById('play'); //play
 
+//function starting the game
 function init(){
     canvasElement.removeEventListener('click', screen);
     canvasElement.addEventListener('click', jumpClickFunction);
@@ -831,7 +833,6 @@ function init(){
     myPowerUps = [];
     score = 0;
     gamePiece = new component(myGameArea.canvas.width/2, myGameArea.canvas.height -100);
-
     var canvasHeight = myGameArea.canvas.height;
     var gap = 300;
     while(canvasHeight > 200){
@@ -855,6 +856,7 @@ function init(){
 //Animation Loop
 function updateGameArea(){
     myGameArea.clear();
+    //to check crash
     for(var i=0; i < myObstacle.length; i++){
         gamePiece.crashWith(myObstacle[i]);
     }
@@ -865,6 +867,7 @@ function updateGameArea(){
         myPowerUps[k].crashWith(gamePiece);
     }
     myGameArea.frameNo++;
+    //to add obstacles, colorswitch and powerups
     if(myObstacle[myObstacle.length-1].y > 200){
         var myObstacleY = -100;
         var random = randomIntFromRange(0,4);
@@ -892,6 +895,7 @@ function updateGameArea(){
             myColorSwitch.push(new colorSwitch(myGameArea.canvas.width/2, 50, 2));
         }
     }
+    //for best score real time upadte
     if(score+1 > bestScore && !(bestScoreUpdate)){
         if(score - bestScore > 2){
             var height = gamePiece.y - 150;
@@ -903,6 +907,7 @@ function updateGameArea(){
     if(bestScoreUpdate){
         bestScoreUpdate.update();
     }
+
     myColorSwitch.forEach((particle)=>{
         particle.update();
     })
@@ -938,6 +943,7 @@ function jumpClickFunction(){
         bestScoreUpdate.dy = 3;
     }
 }
+
 function posUpOnJump(objects){
     objects.forEach((object)=>{
         object.yOnTap = object.y;
@@ -961,7 +967,7 @@ function everyInterval(n){
 }}
 
 
-//to start the game on click
+//to start the game on click play on intro page
 function play(){
     var section = document.querySelector('section');
     section.style.display = "none";
